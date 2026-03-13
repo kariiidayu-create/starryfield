@@ -1,0 +1,30 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getCollection, render } from 'astro:content';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('explorations');
+  return posts.map(post => ({ params: { id: post.id }, props: { post } }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+---
+
+<Base title={post.data.title}>
+  <article style="padding: 20px 0; max-width: 700px;">
+    <div class="post-header">
+      <div class="post-meta" style="margin-bottom: 16px;">
+        <span class="tag">{post.data.tag}</span>
+        <span>{post.data.date}</span>
+      </div>
+      <h1 class="post-title">{post.data.title}</h1>
+    </div>
+    <div class="post-content">
+      <Content />
+    </div>
+    <div style="margin-top: 48px; padding-top: 24px; border-top: 1px dashed rgba(0,255,245,0.15);">
+      <a href="/explorations" style="font-family: var(--pixel-font); font-size: 10px; color: var(--text-dim); text-decoration: none;">← BACK TO EXPLORATIONS</a>
+    </div>
+  </article>
+</Base>

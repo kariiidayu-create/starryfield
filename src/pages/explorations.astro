@@ -1,0 +1,33 @@
+---
+import Base from '../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+
+const allPosts = await getCollection('explorations');
+const posts = allPosts.sort((a, b) => b.data.date.localeCompare(a.data.date));
+---
+
+<Base title="世界探索">
+  <section style="padding: 20px 0;">
+    <h2 class="section-title">
+      <span class="pixel-icon">🌍</span> 世界探索
+    </h2>
+    <p style="font-size: 14px; color: var(--text-dim); margin-bottom: 32px; font-family: var(--mono-font);">
+      > ls ./explorations/
+    </p>
+
+    {posts.map(post => (
+      <a href={`/explorations/${post.id}`} style="text-decoration: none; display: block;">
+        <article class="card">
+          <span class="card-tag">{post.data.tag}</span>
+          <h4 class="card-title">{post.data.title}</h4>
+          <p class="card-excerpt">{post.data.excerpt}</p>
+          <span class="card-date">{post.data.date}</span>
+        </article>
+      </a>
+    ))}
+
+    <p style="font-family: var(--pixel-font); font-size: 10px; color: var(--text-dim); text-align: center; margin-top: 40px;">
+      // 更多探索进行中...
+    </p>
+  </section>
+</Base>

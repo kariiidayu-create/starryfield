@@ -1,0 +1,69 @@
+---
+import Base from '../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+
+const allGames = await getCollection('games');
+const games = allGames.sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99)).slice(0, 3);
+
+const allPosts = await getCollection('explorations');
+const posts = allPosts.sort((a, b) => b.data.date.localeCompare(a.data.date)).slice(0, 3);
+---
+
+<Base>
+  <!-- Hero -->
+  <section style="margin-bottom: 60px; padding: 40px 0;">
+    <p style="font-family: var(--mono-font); font-size: 14px; color: var(--text-dim); margin-bottom: 12px;">
+      > SYSTEM.BOOT <span style="color: var(--green);">OK</span>
+    </p>
+    <h2 style="font-size: 22px; font-weight: 300; line-height: 1.8; margin-bottom: 16px;">
+      欢迎来到<span style="color: var(--cyan); text-shadow: var(--glow-cyan);">星原</span>。
+    </h2>
+    <p style="font-size: 15px; color: var(--text-dim); line-height: 1.8; max-width: 600px;">
+      这里存放着我的游戏收藏，以及我对这个世界的好奇和思考。<br />
+      像素与霓虹之间，是一个人的漫游。
+    </p>
+  </section>
+
+  <!-- Games -->
+  <section style="margin-bottom: 60px;">
+    <h3 class="section-title">
+      <span class="pixel-icon">🎮</span> 游戏收藏
+    </h3>
+    <div class="game-grid">
+      {games.map(game => (
+        <a href={`/games/${game.id}`} class="game-card" style="text-decoration: none;">
+          <div style="width: 100%; aspect-ratio: 3/4; background: linear-gradient(135deg, var(--bg-card) 0%, rgba(0,255,245,0.05) 100%); display: flex; align-items: center; justify-content: center; border-bottom: 1px solid rgba(0,255,245,0.1);">
+            <span style="font-family: var(--pixel-font); font-size: 24px; opacity: 0.3;">?</span>
+          </div>
+          <div class="game-card-body">
+            <div class="game-card-title">{game.data.title}</div>
+            <div class="game-card-platform">{game.data.platform}</div>
+          </div>
+        </a>
+      ))}
+      <a href="/games" class="game-card" style="display: flex; align-items: center; justify-content: center; min-height: 200px; border-style: dashed; text-decoration: none;">
+        <span style="font-family: var(--pixel-font); font-size: 10px; color: var(--text-dim);">VIEW ALL →</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- Posts -->
+  <section>
+    <h3 class="section-title">
+      <span class="pixel-icon">🌍</span> 世界探索
+    </h3>
+    {posts.map(post => (
+      <a href={`/explorations/${post.id}`} style="text-decoration: none; display: block;">
+        <article class="card">
+          <span class="card-tag">{post.data.tag}</span>
+          <h4 class="card-title">{post.data.title}</h4>
+          <p class="card-excerpt">{post.data.excerpt}</p>
+          <span class="card-date">{post.data.date}</span>
+        </article>
+      </a>
+    ))}
+    <div style="text-align: center; margin-top: 24px;">
+      <a href="/explorations" style="font-family: var(--pixel-font); font-size: 10px; color: var(--text-dim); text-decoration: none; border-bottom: 1px dashed var(--text-dim); padding-bottom: 2px;">MORE EXPLORATIONS →</a>
+    </div>
+  </section>
+</Base>

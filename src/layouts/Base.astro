@@ -1,0 +1,76 @@
+---
+import '../styles/global.css';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const { title = 'STARRYFIELD', description = '星原 — 游戏收藏与世界探索' } = Astro.props;
+const pageTitle = title === 'STARRYFIELD' ? title : `${title} | STARRYFIELD`;
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <title>{pageTitle}</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  </head>
+  <body>
+    <!-- Starfield background -->
+    <div class="starfield" id="starfield"></div>
+
+    <div class="container">
+      <header class="site-header">
+        <h1 class="site-title glitch"><a href="/">STARRYFIELD</a></h1>
+        <p class="site-subtitle">// 星原 — 一个人的游戏与世界</p>
+        <nav class="site-nav">
+          <a href="/">首页</a>
+          <a href="/games">游戏收藏</a>
+          <a href="/explorations">世界探索</a>
+          <a href="/about">关于</a>
+        </nav>
+      </header>
+
+      <main>
+        <slot />
+      </main>
+
+      <footer class="site-footer">
+        <p>STARRYFIELD © 2026 · BUILT WITH ♥ AND PIXELS</p>
+      </footer>
+    </div>
+
+    <script>
+      // Generate starfield
+      const starfield = document.getElementById('starfield');
+      if (starfield) {
+        for (let i = 0; i < 80; i++) {
+          const star = document.createElement('div');
+          star.className = 'star';
+          star.style.left = Math.random() * 100 + '%';
+          star.style.top = Math.random() * 100 + '%';
+          star.style.setProperty('--duration', (2 + Math.random() * 4) + 's');
+          star.style.setProperty('--delay', (Math.random() * 3) + 's');
+          if (Math.random() > 0.7) {
+            star.style.width = '3px';
+            star.style.height = '3px';
+          }
+          starfield.appendChild(star);
+        }
+      }
+
+      // Active nav link
+      const links = document.querySelectorAll('.site-nav a');
+      const path = window.location.pathname;
+      links.forEach(link => {
+        const href = link.getAttribute('href');
+        if (href === '/' && path === '/') link.classList.add('active');
+        else if (href !== '/' && path.startsWith(href)) link.classList.add('active');
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,32 @@
+---
+import Base from '../../layouts/Base.astro';
+import { getCollection, render } from 'astro:content';
+
+export async function getStaticPaths() {
+  const games = await getCollection('games');
+  return games.map(game => ({ params: { id: game.id }, props: { game } }));
+}
+
+const { game } = Astro.props;
+const { Content } = await render(game);
+---
+
+<Base title={game.data.title}>
+  <article style="padding: 20px 0; max-width: 700px;">
+    <div class="post-header">
+      <div class="post-meta" style="margin-bottom: 16px;">
+        <span class="tag">{game.data.tag}</span>
+        <span>{game.data.platform}</span>
+        {game.data.rating && <span style="color: var(--cyan);">{game.data.rating}</span>}
+      </div>
+      <h1 class="post-title">{game.data.title}</h1>
+      <p style="font-size: 15px; color: var(--text-dim); margin-top: 8px; font-style: italic;">{game.data.note}</p>
+    </div>
+    <div class="post-content" style="margin-top: 32px;">
+      <Content />
+    </div>
+    <div style="margin-top: 48px; padding-top: 24px; border-top: 1px dashed rgba(0,255,245,0.15);">
+      <a href="/games" style="font-family: var(--pixel-font); font-size: 10px; color: var(--text-dim); text-decoration: none;">← BACK TO GAMES</a>
+    </div>
+  </article>
+</Base>
