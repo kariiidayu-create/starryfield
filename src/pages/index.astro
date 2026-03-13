@@ -93,9 +93,13 @@ const posts = allPosts.sort((a, b) => b.data.date.localeCompare(a.data.date)).sl
     <div class="game-grid">
       {games.map(game => (
         <a href={`/games/${game.id}`} class="game-card" style="text-decoration: none;">
-          <div style="width: 100%; aspect-ratio: 3/4; background: linear-gradient(135deg, var(--bg-card) 0%, rgba(0,255,245,0.05) 100%); display: flex; align-items: center; justify-content: center; border-bottom: 1px solid rgba(0,255,245,0.1);">
-            <span style="font-family: var(--pixel-font); font-size: 24px; opacity: 0.3;">?</span>
-          </div>
+          {game.data.cover ? (
+            <img class="game-card-img" src={game.data.cover} alt={game.data.title} />
+          ) : (
+            <div style="width: 100%; aspect-ratio: 3/4; background: linear-gradient(135deg, var(--bg-card) 0%, rgba(0,255,245,0.05) 100%); display: flex; align-items: center; justify-content: center; border-bottom: 1px solid rgba(0,255,245,0.1);">
+              <span style="font-family: var(--pixel-font); font-size: 24px; opacity: 0.3;">?</span>
+            </div>
+          )}
           <div class="game-card-body">
             <div class="game-card-title">{game.data.title}</div>
             <div class="game-card-platform">{game.data.platform}</div>
