@@ -1,0 +1,69 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base title="留言板">
+  <section style="padding: 20px 0;">
+    <h2 class="section-title">
+      <span class="pixel-icon">💬</span> 留言板
+    </h2>
+    <p style="font-size: 14px; color: var(--text-dim); margin-bottom: 32px; font-family: var(--mono-font);">
+      > echo "说点什么吧~"
+    </p>
+
+    <div id="twikoo-comment"></div>
+  </section>
+
+  <script src="https://cdn.jsdelivr.net/npm/twikoo@1.6.40/dist/twikoo.all.min.js"></script>
+  <script>
+    twikoo.init({
+      envId: 'https://twikoo.kariiidayu.workers.dev',
+      el: '#twikoo-comment',
+      lang: 'zh-CN',
+    });
+  </script>
+
+  <style>
+    /* Twikoo 样式覆盖，适配赛博主题 */
+    :global(.tk-comments) {
+      --tk-color: var(--text) !important;
+      --tk-main-color: var(--cyan) !important;
+      --tk-meta-color: var(--text-dim) !important;
+    }
+    :global(.tk-input) {
+      background: var(--bg-card) !important;
+      border: 1px solid rgba(0, 255, 245, 0.2) !important;
+      color: var(--text) !important;
+      border-radius: 2px !important;
+    }
+    :global(.tk-input:focus) {
+      border-color: var(--cyan) !important;
+      box-shadow: var(--glow-cyan) !important;
+    }
+    :global(.tk-submit .tk-btn) {
+      background: transparent !important;
+      border: 1px solid var(--cyan) !important;
+      color: var(--cyan) !important;
+      border-radius: 2px !important;
+      font-family: var(--pixel-font) !important;
+      font-size: 10px !important;
+    }
+    :global(.tk-submit .tk-btn:hover) {
+      background: rgba(0, 255, 245, 0.1) !important;
+      box-shadow: var(--glow-cyan) !important;
+    }
+    :global(.tk-content) {
+      color: var(--text) !important;
+    }
+    :global(.tk-nick),
+    :global(.tk-time) {
+      color: var(--text-dim) !important;
+    }
+    :global(.tk-comment) {
+      border-bottom: 1px solid rgba(0, 255, 245, 0.08) !important;
+    }
+    :global(.tk-extras) {
+      color: var(--text-dim) !important;
+    }
+  </style>
+</Base>
