@@ -262,7 +262,7 @@ const pageTitle = title === 'STARRYFIELD' ? title : `${title} | STARRYFIELD`;
 
       // Visitor counter via Twikoo COUNTER_GET (once per session)
       (async () => {
-        const TWIKOO = 'https://twikoo.kariiidayu.workers.dev';
+        const TWIKOO = 'https://twikoo.starryfield.space';
         const post = (body) => fetch(TWIKOO, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
