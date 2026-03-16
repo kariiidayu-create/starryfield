@@ -1,0 +1,124 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base title="404">
+  <section class="error-page">
+    <div class="error-code">
+      <span class="glitch-text" data-text="404">404</span>
+    </div>
+    <div class="error-terminal">
+      <p class="error-line">> SCAN_RESULT: <span style="color: var(--cyan);">SIGNAL_LOST</span></p>
+      <p class="error-line">> 这片星域尚未被探索...</p>
+      <p class="error-line">> 也许它还在等待被发现。</p>
+    </div>
+    <a href="/" class="error-home">[RETURN TO STARRYFIELD]</a>
+  </section>
+
+  <style>
+    .error-page {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 60vh;
+      text-align: center;
+      padding: 40px 0;
+    }
+
+    .error-code {
+      margin-bottom: 32px;
+    }
+
+    .glitch-text {
+      font-family: var(--pixel-font);
+      font-size: 96px;
+      color: var(--cyan);
+      text-shadow: var(--glow-cyan);
+      position: relative;
+      display: inline-block;
+      animation: glitch-404 3s infinite;
+    }
+
+    .glitch-text::before,
+    .glitch-text::after {
+      content: attr(data-text);
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .glitch-text::before {
+      color: var(--magenta);
+      animation: glitch-shift-1 2s infinite;
+      clip-path: inset(0 0 60% 0);
+    }
+
+    .glitch-text::after {
+      color: var(--green);
+      animation: glitch-shift-2 2.5s infinite;
+      clip-path: inset(40% 0 0 0);
+    }
+
+    @keyframes glitch-404 {
+      0%, 90%, 100% { text-shadow: var(--glow-cyan); }
+      92% { text-shadow: -4px 0 var(--magenta), 4px 0 var(--cyan); transform: skewX(-2deg); }
+      94% { text-shadow: 4px 0 var(--magenta), -4px 0 var(--cyan); transform: skewX(1deg); }
+      96% { text-shadow: var(--glow-cyan); transform: skewX(0); }
+    }
+
+    @keyframes glitch-shift-1 {
+      0%, 85%, 100% { transform: translate(0); opacity: 0; }
+      86% { transform: translate(-3px, -2px); opacity: 0.7; }
+      88% { transform: translate(3px, 1px); opacity: 0.7; }
+      90% { transform: translate(0); opacity: 0; }
+    }
+
+    @keyframes glitch-shift-2 {
+      0%, 88%, 100% { transform: translate(0); opacity: 0; }
+      89% { transform: translate(2px, 3px); opacity: 0.7; }
+      91% { transform: translate(-2px, -1px); opacity: 0.7; }
+      93% { transform: translate(0); opacity: 0; }
+    }
+
+    .error-terminal {
+      background: var(--bg-card);
+      border: 1px solid rgba(0, 255, 245, 0.15);
+      border-radius: 2px;
+      padding: 24px 32px;
+      margin-bottom: 40px;
+      text-align: left;
+      max-width: 480px;
+    }
+
+    .error-line {
+      font-family: var(--mono-font);
+      font-size: 15px;
+      color: var(--cyan);
+      line-height: 2;
+    }
+
+    .error-home {
+      font-family: var(--pixel-font);
+      font-size: 13px;
+      color: var(--cyan);
+      text-decoration: none;
+      border: 1px solid var(--cyan);
+      padding: 12px 24px;
+      border-radius: 2px;
+      transition: all 0.3s;
+    }
+
+    .error-home:hover {
+      background: rgba(0, 255, 245, 0.1);
+      box-shadow: var(--glow-cyan);
+    }
+
+    @media (max-width: 640px) {
+      .glitch-text { font-size: 64px; }
+      .error-terminal { padding: 16px 20px; }
+    }
+  </style>
+</Base>

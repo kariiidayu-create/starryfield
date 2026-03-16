@@ -1,5 +1,6 @@
 ---
 import Base from '../layouts/Base.astro';
+import PixelIcon from '../components/PixelIcon.astro';
 import { getCollection } from 'astro:content';
 
 const allGames = await getCollection('games');
@@ -7,27 +8,146 @@ const games = allGames.sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99
 
 const allPosts = await getCollection('explorations');
 const posts = allPosts.sort((a, b) => b.data.date.localeCompare(a.data.date)).slice(0, 3);
+
+const allCrafts = await getCollection('crafts');
+const crafts = allCrafts.sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99)).slice(0, 3);
+
+const allDrawings = await getCollection('drawings');
+const drawings = allDrawings.sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99)).slice(0, 3);
+
+const allCooking = await getCollection('cooking');
+const dishes = allCooking.sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99)).slice(0, 3);
+
+// Recent activity: merge all content with icons and sort by date
+// Pixel icon SVGs for dynamic rendering
+const pxIcons: Record<string, string> = {
+  games: '<svg viewBox="0 0 16 16" width="16" height="16" fill="none" style="display:inline-block;vertical-align:-0.15em;color:currentColor;"><rect x="2" y="5" width="12" height="8" rx="1" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="5" y="7" width="2" height="1" fill="currentColor"/><rect x="6" y="6" width="1" height="3" fill="currentColor"/><rect x="10" y="7" width="1" height="1" fill="currentColor"/><rect x="12" y="7" width="1" height="1" fill="currentColor"/><rect x="11" y="6" width="1" height="1" fill="currentColor"/><rect x="11" y="8" width="1" height="1" fill="currentColor"/></svg>',
+  explorations: '<svg viewBox="0 0 16 16" width="16" height="16" fill="none" style="display:inline-block;vertical-align:-0.15em;color:currentColor;"><circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="1.5"/><ellipse cx="8" cy="8" rx="3" ry="6" fill="none" stroke="currentColor" stroke-width="1"/><line x1="2" y1="8" x2="14" y2="8" stroke="currentColor" stroke-width="1"/></svg>',
+  crafts: '<svg viewBox="0 0 16 16" width="16" height="16" fill="none" style="display:inline-block;vertical-align:-0.15em;color:currentColor;"><circle cx="5" cy="12" r="2" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="11" cy="12" r="2" fill="none" stroke="currentColor" stroke-width="1.5"/><line x1="6.5" y1="10.5" x2="11" y2="3" stroke="currentColor" stroke-width="1.5"/><line x1="9.5" y1="10.5" x2="5" y2="3" stroke="currentColor" stroke-width="1.5"/></svg>',
+  drawings: '<svg viewBox="0 0 16 16" width="16" height="16" fill="none" style="display:inline-block;vertical-align:-0.15em;color:currentColor;"><path d="M8 2C4.5 2 2 5 2 8c0 3 2 6 6 6 1 0 1.5-0.5 1.5-1s-0.3-0.8-0.5-1.2c-0.2-0.4-0.5-0.8-0.5-1.3 0-0.8 0.7-1.5 1.5-1.5h1.5c2.5 0 4.5-2 4.5-4.5C16 2.5 12.5 2 8 2z" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="5" y="5" width="1.5" height="1.5" rx="0.75" fill="currentColor"/><rect x="8" y="4" width="1.5" height="1.5" rx="0.75" fill="currentColor"/><rect x="11" y="5.5" width="1.5" height="1.5" rx="0.75" fill="currentColor"/></svg>',
+  cooking: '<svg viewBox="0 0 16 16" width="16" height="16" fill="none" style="display:inline-block;vertical-align:-0.15em;color:currentColor;"><circle cx="7" cy="8" r="5" fill="none" stroke="currentColor" stroke-width="1.5"/><line x1="12" y1="8" x2="16" y2="8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+};
+const pathMap: Record<string, string> = { games: 'games', explorations: 'explorations', crafts: 'crafts', drawings: 'drawings', cooking: 'cooking' };
+const recentItems = [
+  ...allGames.map(c => ({ title: c.data.title, date: c.data.date || '2026-03', icon: pxIcons.games, href: `/games/${c.id}` })),
+  ...allPosts.map(c => ({ title: c.data.title, date: c.data.date, icon: pxIcons.explorations, href: `/explorations/${c.id}` })),
+  ...allCrafts.map(c => ({ title: c.data.title, date: c.data.date, icon: pxIcons.crafts, href: `/crafts/${c.id}` })),
+  ...allDrawings.map(c => ({ title: c.data.title, date: c.data.date, icon: pxIcons.drawings, href: `/drawings/${c.id}` })),
+  ...allCooking.map(c => ({ title: c.data.title, date: c.data.date, icon: pxIcons.cooking, href: `/cooking/${c.id}` })),
+].sort((a, b) => b.date.localeCompare(a.date)).slice(0, 5);
+
+// Heatmap: use git commit history
+import { execSync } from 'node:child_process';
+const gitLog = execSync('git log --format="%ad" --date=short', { cwd: process.cwd(), encoding: 'utf-8' });
+const dateCounts: Record<string, number> = {};
+for (const line of gitLog.trim().split('\n')) {
+  const key = line.trim();
+  if (key) dateCounts[key] = (dateCounts[key] || 0) + 1;
+}
+
+// Generate last 26 weeks of dates for the heatmap
+const today = new Date();
+const weeks: { date: string; count: number; dayOfWeek: number }[][] = [];
+const startDate = new Date(today);
+startDate.setDate(startDate.getDate() - (26 * 7 - 1) - startDate.getDay());
+
+let currentWeek: { date: string; count: number; dayOfWeek: number }[] = [];
+for (let i = 0; i < 26 * 7 + today.getDay() + 1; i++) {
+  const d = new Date(startDate);
+  d.setDate(d.getDate() + i);
+  const key = d.toISOString().slice(0, 10);
+  const dayOfWeek = d.getDay();
+  if (dayOfWeek === 0 && currentWeek.length > 0) {
+    weeks.push(currentWeek);
+    currentWeek = [];
+  }
+  currentWeek.push({ date: key, count: dateCounts[key] || 0, dayOfWeek });
+}
+if (currentWeek.length > 0) weeks.push(currentWeek);
+
+// Month labels: find which week index each month starts at
+const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const monthLabels: { name: string; col: number }[] = [];
+let lastMonth = -1;
+for (let w = 0; w < weeks.length; w++) {
+  const firstDay = weeks[w][0];
+  const m = new Date(firstDay.date).getMonth();
+  if (m !== lastMonth) {
+    monthLabels.push({ name: monthNames[m], col: w });
+    lastMonth = m;
+  }
+}
+
+// Today info for the calendar widget
+const todayStr = today.toISOString().slice(0, 10);
+const dayOfMonth = today.getDate();
+const weekdayNames = ['星期日','星期一','星期二','星期三','星期四','星期五','星期六'];
+const todayWeekday = weekdayNames[today.getDay()];
+const todayMonthLabel = `${today.getFullYear()}年${today.getMonth() + 1}月`;
+
+// Tag cloud: collect all tags from all collections
+const tagCounts = new Map<string, number>();
+[...allGames, ...allPosts, ...allCrafts, ...allDrawings, ...allCooking].forEach(item => {
+  const tag = item.data.tag;
+  if (tag) tagCounts.set(tag, (tagCounts.get(tag) || 0) + 1);
+});
+const sortedTags = [...tagCounts.entries()].sort((a, b) => b[1] - a[1]);
+
+// Stats dashboard
+const launchDate = new Date('2026-03-13');
+const daysAlive = Math.floor((today.getTime() - launchDate.getTime()) / 86400000);
+const stats = [
+  { icon: pxIcons.games, label: '游戏收藏', value: allGames.length, unit: '款' },
+  { icon: pxIcons.explorations, label: '世界探索', value: allPosts.length, unit: '篇' },
+  { icon: pxIcons.crafts, label: '手工作品', value: allCrafts.length, unit: '件' },
+  { icon: pxIcons.drawings, label: '绘画作品', value: allDrawings.length, unit: '幅' },
+  { icon: pxIcons.cooking, label: '美食烹饪', value: allCooking.length, unit: '道' },
+  { icon: '<svg viewBox="0 0 16 16" width="16" height="16" fill="none" style="display:inline-block;vertical-align:-0.15em;color:currentColor;"><polygon points="8,1 9.8,6 15,6.5 11,10 12.5,15 8,12 3.5,15 5,10 1,6.5 6.2,6" fill="currentColor"/></svg>', label: '已运行', value: daysAlive, unit: '天' },
+];
 ---
 
 <Base>
+  <!-- Two-column layout -->
+  <div class="home-layout">
+    <div class="home-main">
+
   <!-- Hero -->
   <section class="hero-section">
     <div class="hero-bg">
       <img src="/images/hero.jpg" alt="" />
     </div>
     <div class="hero-content">
-      <div class="hero-avatar">
-        <img src="/images/avatar.jpg" alt="avatar" />
+      <div class="hero-avatar-wrap">
+        <div class="avatar-bubble" id="avatar-bubble">干嘛戳我</div>
+        <div class="hero-avatar" id="hero-avatar">
+          <img src="/images/avatar.jpg" alt="avatar" />
+        </div>
       </div>
-      <p style="font-family: var(--mono-font); font-size: 14px; color: var(--text-dim); margin-bottom: 12px;">
-        > SYSTEM.BOOT <span style="color: var(--green);">OK</span>
-      </p>
-      <h2 style="font-size: 22px; font-weight: 300; line-height: 1.8; margin-bottom: 16px;">
-        欢迎来到<span style="color: var(--cyan); text-shadow: var(--glow-cyan);">星原</span>。
-      </h2>
+      <div class="social-links" style="margin-top: 12px; margin-bottom: 20px;">
+        <button class="social-icon" title="微信" aria-label="微信" data-qr="/images/qr-weixin.jpg">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M9.5 4C5.36 4 2 6.69 2 10c0 1.89 1.08 3.56 2.78 4.66L4 17l2.5-1.18C7.47 16.27 8.47 16.5 9.5 16.5c.17 0 .34 0 .5-.02C9.68 15.99 9.5 15.52 9.5 15c0-3.04 2.69-5.5 6-5.5.17 0 .34.01.5.02C15.59 6.35 12.86 4 9.5 4zM7 9a1 1 0 110-2 1 1 0 010 2zm5 0a1 1 0 110-2 1 1 0 010 2zm3.5 3c-2.97 0-5.5 2.02-5.5 4.5s2.53 4.5 5.5 4.5c.88 0 1.7-.18 2.43-.5L20 21.5l-.6-2.05C20.95 18.42 21 17.5 21 16.5c0-2.48-2.53-4.5-5.5-4.5zm-1.5 3a.75.75 0 110-1.5.75.75 0 010 1.5zm3 0a.75.75 0 110-1.5.75.75 0 010 1.5z"/></svg>
+        </button>
+        <button class="social-icon" title="QQ" aria-label="QQ" data-qr="/images/qr-qq.jpg">
+          <svg viewBox="0 0 32 32" width="20" height="20" fill="currentColor"><path d="M16 3c-4 0-7.2 3.5-7.2 8.2 0 .5 0 1 .1 1.5C6.6 14.2 5 17 5 19c0 1.5.6 2.5 1.2 3.2-.2.8-.5 1.8-.5 2.3 0 .8.5 1 .8.8.5-.2 1.5-.7 2.3-1.1.6 1 1.8 2 3.5 2.5-.3.3-.3.7-.3 1 0 1 2 1.6 4 1.6s4-.6 4-1.6c0-.3 0-.7-.3-1 1.7-.5 2.9-1.5 3.5-2.5.8.4 1.8.9 2.3 1.1.3.2.8 0 .8-.8 0-.5-.3-1.5-.5-2.3.6-.7 1.2-1.7 1.2-3.2 0-2-1.6-4.8-3.9-6.3.1-.5.1-1 .1-1.5C23.2 6.5 20 3 16 3zm-3.5 8.5a1.2 1.2 0 110-2.4 1.2 1.2 0 010 2.4zm7 0a1.2 1.2 0 110-2.4 1.2 1.2 0 010 2.4z"/></svg>
+        </button>
+        <a href="https://space.bilibili.com/401149861" target="_blank" rel="noopener" class="social-icon" title="Bilibili" aria-label="Bilibili">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M6.73 2.97a.75.75 0 011.06 0L9.36 4.5h5.28l1.57-1.53a.75.75 0 111.05 1.06L16.1 5.19c2.15.18 3.9 1.92 3.9 4.08v6.46c0 2.27-1.86 4.13-4.13 4.13H8.13C5.86 19.86 4 18 4 15.73V9.27c0-2.16 1.75-3.9 3.9-4.08L6.73 4.03a.75.75 0 010-1.06zM8.13 6.86c-1.33 0-2.42 1.09-2.42 2.41v6.46c0 1.33 1.09 2.42 2.42 2.42h7.74c1.33 0 2.42-1.09 2.42-2.42V9.27c0-1.32-1.09-2.41-2.42-2.41H8.13zM9 10.5a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zm6 0a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1z"/></svg>
+        </a>
+        <button class="social-icon" title="Email: hak5ma@163.com" aria-label="Email" data-email="hak5ma@163.com">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2zm0 2v.01L12 11l8-4.99V6H4zm0 3.41V18h16V9.41l-8 5-8-5z"/></svg>
+        </button>
+      </div>
+
+      <!-- QR / info modal -->
+      <dialog class="qr-modal" id="qr-modal">
+        <button class="qr-close" id="qr-close" aria-label="关闭">&times;</button>
+        <img id="qr-img" src="" alt="二维码" style="display:none;" />
+        <div id="qr-text" style="display:none; font-family: var(--mono-font); font-size: 15px; color: var(--cyan); text-align: center; padding: 20px 10px; word-break: break-all;"></div>
+      </dialog>
       <p style="font-size: 15px; color: var(--text-dim); line-height: 1.8; max-width: 600px;">
-        这里存放着我的游戏收藏，以及我对这个世界的好奇和思考。<br />
-        像素与霓虹之间，是一个人的漫游。
+        我是<span style="color: var(--cyan);">星见眠</span>，可以叫我阿眠。<br />
+        一个在现实里打MMO的数字游民，在这里记录她的冒险日志。<br />
+        天赋永远不会过期，地图永远没有开完 :)
       </p>
     </div>
   </section>
@@ -83,12 +203,470 @@ const posts = allPosts.sort((a, b) => b.data.date.localeCompare(a.data.date)).sl
       height: 100%;
       object-fit: cover;
     }
+.hero-avatar-wrap {
+      position: relative;
+      width: fit-content;
+      margin-bottom: 24px;
+      margin-left: 24px;
+    }
+    .avatar-bubble {
+      position: absolute;
+      bottom: calc(100% + 10px);
+      left: 0;
+      transform: scale(0);
+      transform-origin: bottom left;
+      background: var(--bg-card);
+      border: 1px solid var(--cyan);
+      box-shadow: var(--glow-cyan);
+      color: var(--cyan);
+      font-size: 14px;
+      padding: 8px 14px;
+      border-radius: 4px;
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s;
+      z-index: 10;
+    }
+    .avatar-bubble::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 20px;
+      border: 6px solid transparent;
+      border-top-color: var(--cyan);
+    }
+    .avatar-bubble.show {
+      transform: scale(1);
+      opacity: 1;
+    }
+    .hero-avatar {
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .hero-avatar:active {
+      transform: scale(0.92);
+    }
+    .social-links {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+    }
+    .social-icon {
+      color: var(--text-dim);
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border: 1px solid rgba(0, 255, 245, 0.15);
+      border-radius: 2px;
+      background: var(--bg-card);
+    }
+    .social-icon:hover {
+      color: var(--cyan);
+      border-color: var(--cyan);
+      box-shadow: var(--glow-cyan);
+      transform: translateY(-2px);
+    }
+    button.social-icon {
+      cursor: pointer;
+      font: inherit;
+    }
+    .qr-modal {
+      border: 1px solid var(--cyan);
+      border-radius: 4px;
+      background: var(--bg-card);
+      box-shadow: 0 0 30px rgba(0, 255, 245, 0.2), 0 0 80px rgba(0, 255, 245, 0.05);
+      padding: 24px;
+      max-width: 280px;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+    .qr-modal::backdrop {
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
+    }
+    .qr-modal img {
+      width: 100%;
+      border-radius: 2px;
+      display: block;
+    }
+    .qr-close {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: none;
+      border: none;
+      color: var(--text-dim);
+      font-size: 22px;
+      cursor: pointer;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 2px;
+      transition: all 0.2s;
+      line-height: 1;
+    }
+    .qr-close:hover {
+      color: var(--cyan);
+      background: rgba(0, 255, 245, 0.1);
+    }
+  </style>
+
+  <!-- Heatmap -->
+  <section style="margin-bottom: 60px;">
+    <h3 class="section-title">
+      <PixelIcon name="satellite" size={20} /> 更新热力图
+    </h3>
+    <div class="heatmap-wrap">
+      <div class="heatmap-layout">
+        <!-- Left: Calendar + Clock -->
+        <div class="heatmap-sidebar">
+          <div class="flip-calendar">
+            <div class="flip-cal-month">{todayMonthLabel}</div>
+            <div class="flip-cal-day">{dayOfMonth}</div>
+            <div class="flip-cal-weekday">{todayWeekday}</div>
+          </div>
+          <div class="live-clock" id="live-clock">--:--:--</div>
+        </div>
+
+        <!-- Right: Heatmap grid -->
+        <div class="heatmap-main">
+          <!-- Month labels -->
+          <div class="heatmap-months">
+            {monthLabels.map((m, i) => {
+              const nextCol = i < monthLabels.length - 1 ? monthLabels[i + 1].col : weeks.length;
+              const span = nextCol - m.col;
+              return (
+                <div class="heatmap-month-label" style={`grid-column: span ${span};`}>
+                  {m.name}
+                </div>
+              );
+            })}
+          </div>
+          <!-- Grid -->
+          <div class="heatmap">
+            {weeks.map(week => (
+              <div class="heatmap-col">
+                {week.map(day => (
+                  <div
+                    class={`heatmap-cell ${day.count > 0 ? (day.count >= 3 ? 'hot' : day.count >= 2 ? 'warm' : 'mild') : ''}`}
+                    title={`${day.date}: ${day.count} 次更新`}
+                  />
+                ))}
+              </div>
+            ))}
+          </div>
+          <!-- Legend -->
+          <div class="heatmap-legend">
+            <span style="font-family: var(--mono-font); font-size: 13px; color: var(--text-dim);">少</span>
+            <div class="heatmap-cell" />
+            <div class="heatmap-cell mild" />
+            <div class="heatmap-cell warm" />
+            <div class="heatmap-cell hot" />
+            <span style="font-family: var(--mono-font); font-size: 13px; color: var(--text-dim);">多</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    // QR / email modal
+    const qrModal = document.getElementById('qr-modal') as HTMLDialogElement;
+    const qrImg = document.getElementById('qr-img') as HTMLImageElement;
+    const qrText = document.getElementById('qr-text');
+    const qrClose = document.getElementById('qr-close');
+
+    function showModal(type: 'img' | 'text', content: string) {
+      if (!qrModal || !qrImg || !qrText) return;
+      if (type === 'img') {
+        qrImg.src = content;
+        qrImg.style.display = 'block';
+        qrText.style.display = 'none';
+      } else {
+        qrText.textContent = content;
+        qrText.style.display = 'block';
+        qrImg.style.display = 'none';
+      }
+      qrModal.showModal();
+    }
+
+    document.querySelectorAll('[data-qr]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const src = btn.getAttribute('data-qr');
+        if (src) showModal('img', src);
+      });
+    });
+    document.querySelectorAll('[data-email]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const email = btn.getAttribute('data-email');
+        if (email) showModal('text', email);
+      });
+    });
+    if (qrClose && qrModal) {
+      qrClose.addEventListener('click', () => qrModal.close());
+    }
+    if (qrModal) {
+      qrModal.addEventListener('click', (e) => {
+        if (e.target === qrModal) qrModal.close();
+      });
+    }
+
+    // Avatar click bubble — random messages + combo easter egg
+    const avatar = document.getElementById('hero-avatar');
+    const bubble = document.getElementById('avatar-bubble');
+    const messages = [
+      '干嘛戳我',
+      '别戳了！',
+      '你好呀，旅行者',
+      '// ERROR: 太多触碰',
+      '要去看看游戏收藏吗？',
+      '星原欢迎你 *',
+      'SYSTEM: 检测到互动',
+      '再戳就要生气了哦',
+      '这里有秘密吗？并没有',
+      '你是第几颗繁星呢～',
+    ];
+    let bubbleTimer;
+    let tapCount = 0;
+    let tapResetTimer;
+    if (avatar && bubble) {
+      avatar.addEventListener('click', () => {
+        tapCount++;
+        clearTimeout(tapResetTimer);
+        tapResetTimer = setTimeout(() => tapCount = 0, 3000);
+
+        // Combo easter egg at 5 taps
+        if (tapCount === 5) {
+          bubble.textContent = '// SYSTEM OVERLOAD !!';
+          document.body.classList.add('glitch-shake');
+          setTimeout(() => document.body.classList.remove('glitch-shake'), 500);
+          tapCount = 0;
+        } else {
+          bubble.textContent = messages[Math.floor(Math.random() * messages.length)];
+        }
+
+        clearTimeout(bubbleTimer);
+        bubble.classList.remove('show');
+        void bubble.offsetWidth;
+        bubble.classList.add('show');
+        bubbleTimer = setTimeout(() => bubble.classList.remove('show'), 2000);
+      });
+    }
+
+    // Live clock
+    function updateClock() {
+      const el = document.getElementById('live-clock');
+      if (!el) return;
+      const now = new Date();
+      const h = String(now.getHours()).padStart(2, '0');
+      const m = String(now.getMinutes()).padStart(2, '0');
+      const s = String(now.getSeconds()).padStart(2, '0');
+      el.textContent = h + ':' + m + ':' + s;
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
+  </script>
+
+  <style>
+    .heatmap-wrap {
+      background: var(--bg-card);
+      border: 1px solid rgba(0, 255, 245, 0.1);
+      border-radius: 2px;
+      padding: 20px;
+      overflow-x: auto;
+    }
+    .heatmap-layout {
+      display: flex;
+      gap: 24px;
+      align-items: flex-start;
+    }
+    .heatmap-sidebar {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      flex-shrink: 0;
+    }
+    .flip-calendar {
+      background: var(--bg-deep);
+      border: 1px solid rgba(0, 255, 245, 0.2);
+      border-radius: 4px;
+      padding: 12px 16px;
+      text-align: center;
+      min-width: 100px;
+      position: relative;
+      overflow: hidden;
+    }
+    .flip-calendar::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--cyan), var(--magenta));
+    }
+    .flip-cal-month {
+      font-family: var(--mono-font);
+      font-size: 13px;
+      color: var(--text-dim);
+      margin-bottom: 4px;
+    }
+    .flip-cal-day {
+      font-family: var(--pixel-font);
+      font-size: 32px;
+      color: var(--cyan);
+      text-shadow: var(--glow-cyan);
+      line-height: 1.2;
+      margin-bottom: 4px;
+    }
+    .flip-cal-weekday {
+      font-family: var(--mono-font);
+      font-size: 13px;
+      color: var(--text-dim);
+    }
+    .live-clock {
+      font-family: var(--pixel-font);
+      font-size: 13px;
+      color: var(--cyan);
+      text-shadow: var(--glow-cyan);
+      letter-spacing: 2px;
+    }
+    .heatmap-main {
+      flex: 1;
+      min-width: 0;
+    }
+    .heatmap-months {
+      display: grid;
+      grid-auto-flow: column;
+      grid-auto-columns: 1fr;
+      gap: 0;
+      margin-bottom: 6px;
+      padding-left: 0;
+    }
+    .heatmap-month-label {
+      font-family: var(--mono-font);
+      font-size: 13px;
+      color: var(--text-dim);
+      text-align: left;
+      padding-left: 2px;
+    }
+    .heatmap {
+      display: flex;
+      gap: 3px;
+      justify-content: flex-end;
+    }
+    .heatmap-col {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .heatmap-cell {
+      width: 12px;
+      height: 12px;
+      border-radius: 2px;
+      background: rgba(0, 255, 245, 0.06);
+      transition: all 0.2s;
+    }
+    .heatmap-cell:hover {
+      outline: 1px solid var(--cyan);
+    }
+    .heatmap-cell.mild {
+      background: rgba(0, 255, 245, 0.25);
+      box-shadow: 0 0 4px rgba(0, 255, 245, 0.1);
+    }
+    .heatmap-cell.warm {
+      background: rgba(0, 255, 245, 0.5);
+      box-shadow: 0 0 6px rgba(0, 255, 245, 0.2);
+    }
+    .heatmap-cell.hot {
+      background: rgba(0, 255, 245, 0.85);
+      box-shadow: 0 0 10px rgba(0, 255, 245, 0.4);
+    }
+    .heatmap-legend {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      justify-content: flex-end;
+      margin-top: 12px;
+    }
+    @media (max-width: 640px) {
+      .heatmap-layout { flex-direction: column; align-items: center; }
+      .heatmap-sidebar { flex-direction: row; gap: 16px; }
+      .heatmap-cell { width: 10px; height: 10px; }
+    }
+  </style>
+
+  <!-- Recent Activity -->
+  <section style="margin-bottom: 60px;">
+    <h3 class="section-title">
+      <PixelIcon name="lightning" size={20} /> 最近动态
+    </h3>
+    <div class="recent-list">
+      {recentItems.map(item => (
+        <a href={item.href} class="recent-item" style="text-decoration: none;">
+          <span class="recent-icon" set:html={item.icon} />
+          <span class="recent-title">{item.title}</span>
+          <span class="recent-date">{item.date}</span>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <style>
+    .recent-list {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .recent-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      background: var(--bg-card);
+      border: 1px solid rgba(0, 255, 245, 0.06);
+      border-radius: 2px;
+      transition: all 0.2s;
+    }
+    .recent-item:hover {
+      background: var(--bg-card-hover);
+      border-color: rgba(0, 255, 245, 0.2);
+      transform: translateX(4px);
+    }
+    .recent-icon {
+      font-size: 18px;
+      flex-shrink: 0;
+      color: var(--cyan);
+    }
+    .recent-title {
+      font-size: 15px;
+      color: var(--text);
+      flex: 1;
+    }
+    .recent-item:hover .recent-title {
+      color: var(--cyan);
+    }
+    .recent-date {
+      font-family: var(--mono-font);
+      font-size: 13px;
+      color: var(--text-dim);
+      flex-shrink: 0;
+    }
   </style>
 
   <!-- Games -->
   <section style="margin-bottom: 60px;">
     <h3 class="section-title">
-      <span class="pixel-icon">🎮</span> 游戏收藏
+      <PixelIcon name="gamepad" size={20} /> 游戏收藏
     </h3>
     <div class="game-grid">
       {games.map(game => (
@@ -107,7 +685,70 @@ const posts = allPosts.sort((a, b) => b.data.date.localeCompare(a.data.date)).sl
         </a>
       ))}
       <a href="/games" class="game-card" style="display: flex; align-items: center; justify-content: center; min-height: 200px; border-style: dashed; text-decoration: none;">
-        <span style="font-family: var(--pixel-font); font-size: 10px; color: var(--text-dim);">VIEW ALL →</span>
+        <span style="font-family: var(--pixel-font); font-size: 13px; color: var(--text-dim);">VIEW ALL →</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- Crafts -->
+  <section style="margin-bottom: 60px;">
+    <h3 class="section-title">
+      <PixelIcon name="scissors" size={20} /> 手工制作
+    </h3>
+    <div class="game-grid">
+      {crafts.map(craft => (
+        <a href={`/crafts/${craft.id}`} class="game-card" style="text-decoration: none;">
+          <img class="game-card-img" src={craft.data.cover} alt={craft.data.title} style="aspect-ratio: 4/3;" />
+          <div class="game-card-body">
+            <div class="game-card-title">{craft.data.title}</div>
+            <div class="game-card-platform">{craft.data.date}</div>
+          </div>
+        </a>
+      ))}
+      <a href="/crafts" class="game-card" style="display: flex; align-items: center; justify-content: center; min-height: 200px; border-style: dashed; text-decoration: none;">
+        <span style="font-family: var(--pixel-font); font-size: 13px; color: var(--text-dim);">VIEW ALL →</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- Drawings -->
+  <section style="margin-bottom: 60px;">
+    <h3 class="section-title">
+      <PixelIcon name="palette" size={20} /> 绘画作品
+    </h3>
+    <div class="game-grid">
+      {drawings.map(drawing => (
+        <a href={`/drawings/${drawing.id}`} class="game-card" style="text-decoration: none;">
+          <img class="game-card-img" src={drawing.data.cover} alt={drawing.data.title} style="aspect-ratio: 1/1;" />
+          <div class="game-card-body">
+            <div class="game-card-title">{drawing.data.title}</div>
+            <div class="game-card-platform">{drawing.data.date}</div>
+          </div>
+        </a>
+      ))}
+      <a href="/drawings" class="game-card" style="display: flex; align-items: center; justify-content: center; min-height: 200px; border-style: dashed; text-decoration: none;">
+        <span style="font-family: var(--pixel-font); font-size: 13px; color: var(--text-dim);">VIEW ALL →</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- Cooking -->
+  <section style="margin-bottom: 60px;">
+    <h3 class="section-title">
+      <PixelIcon name="cooking" size={20} /> 美食烹饪
+    </h3>
+    <div class="game-grid">
+      {dishes.map(dish => (
+        <a href={`/cooking/${dish.id}`} class="game-card" style="text-decoration: none;">
+          <img class="game-card-img" src={dish.data.cover} alt={dish.data.title} style="aspect-ratio: 4/3;" />
+          <div class="game-card-body">
+            <div class="game-card-title">{dish.data.title}</div>
+            <div class="game-card-platform">{dish.data.date}</div>
+          </div>
+        </a>
+      ))}
+      <a href="/cooking" class="game-card" style="display: flex; align-items: center; justify-content: center; min-height: 200px; border-style: dashed; text-decoration: none;">
+        <span style="font-family: var(--pixel-font); font-size: 13px; color: var(--text-dim);">VIEW ALL →</span>
       </a>
     </div>
   </section>
@@ -115,7 +756,7 @@ const posts = allPosts.sort((a, b) => b.data.date.localeCompare(a.data.date)).sl
   <!-- Posts -->
   <section>
     <h3 class="section-title">
-      <span class="pixel-icon">🌍</span> 世界探索
+      <PixelIcon name="globe" size={20} /> 世界探索
     </h3>
     {posts.map(post => (
       <a href={`/explorations/${post.id}`} style="text-decoration: none; display: block;">
@@ -128,7 +769,210 @@ const posts = allPosts.sort((a, b) => b.data.date.localeCompare(a.data.date)).sl
       </a>
     ))}
     <div style="text-align: center; margin-top: 24px;">
-      <a href="/explorations" style="font-family: var(--pixel-font); font-size: 10px; color: var(--text-dim); text-decoration: none; border-bottom: 1px dashed var(--text-dim); padding-bottom: 2px;">MORE EXPLORATIONS →</a>
+      <a href="/explorations" style="font-family: var(--pixel-font); font-size: 13px; color: var(--text-dim); text-decoration: none; border-bottom: 1px dashed var(--text-dim); padding-bottom: 2px;">MORE EXPLORATIONS →</a>
     </div>
   </section>
+
+    </div><!-- /.home-main -->
+
+    <!-- Sidebar -->
+    <aside class="home-sidebar">
+      <div class="sidebar-stats">
+        <h3 class="sidebar-title">
+          <PixelIcon name="chart" size={20} /> 站点统计
+        </h3>
+        <div class="sidebar-stats-grid">
+          {stats.map(s => (
+            <div class="sidebar-stat">
+              <div class="sidebar-stat-icon" set:html={s.icon} />
+              <div class="sidebar-stat-info">
+                <span class="sidebar-stat-value">{s.value}</span>
+                <span class="sidebar-stat-unit">{s.unit}</span>
+              </div>
+              <div class="sidebar-stat-label">{s.label}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div class="sidebar-block">
+        <h3 class="sidebar-title">
+          <PixelIcon name="tag" size={20} /> 标签云
+        </h3>
+        <div class="tag-cloud">
+          {sortedTags.map(([tag, count]) => {
+            const maxCount = sortedTags[0][1];
+            const minSize = 11;
+            const maxSize = 18;
+            const size = Math.round(minSize + (count / maxCount) * (maxSize - minSize));
+            return (
+              <a href={`/tags/${encodeURIComponent(tag)}`} class="tag-cloud-item" style={`font-size: ${size}px;`}>
+                {tag}
+              </a>
+            );
+          })}
+        </div>
+      </div>
+
+      <div class="sidebar-block">
+        <h3 class="sidebar-title">
+          <PixelIcon name="lightning" size={20} /> 快速导航
+        </h3>
+        <div class="sidebar-links">
+          <a href="/games"><PixelIcon name="gamepad" size={14} /> 游戏收藏</a>
+          <a href="/explorations"><PixelIcon name="globe" size={14} /> 世界探索</a>
+          <a href="/crafts"><PixelIcon name="scissors" size={14} /> 手工制作</a>
+          <a href="/drawings"><PixelIcon name="palette" size={14} /> 绘画作品</a>
+          <a href="/cooking"><PixelIcon name="cooking" size={14} /> 美食烹饪</a>
+          <a href="/gallery"><PixelIcon name="camera" size={14} /> 相册</a>
+          <a href="/bookmarks"><PixelIcon name="bookmark" size={14} /> 收藏夹</a>
+          <a href="/guestbook"><PixelIcon name="comment" size={14} /> 留言板</a>
+          <a href="/about"><PixelIcon name="star" size={14} /> 关于星原</a>
+        </div>
+      </div>
+    </aside>
+  </div><!-- /.home-layout -->
+
+  <style>
+    .home-layout {
+      display: flex;
+      gap: 40px;
+      align-items: flex-start;
+    }
+    .home-main {
+      flex: 1;
+      min-width: 0;
+    }
+    .home-sidebar {
+      width: 260px;
+      flex-shrink: 0;
+      position: sticky;
+      top: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .sidebar-stats,
+    .sidebar-block {
+      background: var(--bg-card);
+      border: 1px solid rgba(0, 255, 245, 0.1);
+      border-radius: 2px;
+      padding: 20px;
+    }
+    .sidebar-title {
+      font-family: var(--pixel-font);
+      font-size: 12px;
+      color: var(--cyan);
+      text-shadow: var(--glow-cyan);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .sidebar-stats-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .sidebar-stat {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(0, 255, 245, 0.06);
+    }
+    .sidebar-stat:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+    .sidebar-stat-icon {
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+    .sidebar-stat-info {
+      margin-left: auto;
+      text-align: right;
+    }
+    .sidebar-stat-value {
+      font-family: var(--pixel-font);
+      font-size: 18px;
+      color: var(--cyan);
+      text-shadow: var(--glow-cyan);
+    }
+    .sidebar-stat-unit {
+      font-family: var(--mono-font);
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-left: 4px;
+    }
+    .sidebar-stat-label {
+      font-family: var(--mono-font);
+      font-size: 12px;
+      color: var(--text-dim);
+      flex: 1;
+    }
+    .sidebar-links {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .sidebar-links a {
+      font-family: var(--mono-font);
+      font-size: 13px;
+      color: var(--text-dim);
+      text-decoration: none;
+      padding: 8px 10px;
+      border-radius: 2px;
+      transition: all 0.2s;
+    }
+    .sidebar-links a:hover {
+      color: var(--cyan);
+      background: rgba(0, 255, 245, 0.06);
+    }
+    .tag-cloud {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .tag-cloud-item {
+      font-family: var(--mono-font);
+      color: var(--text-dim);
+      text-decoration: none;
+      padding: 3px 8px;
+      border: 1px solid rgba(0, 255, 245, 0.15);
+      border-radius: 2px;
+      transition: all 0.2s;
+      line-height: 1.4;
+    }
+    .tag-cloud-item:hover {
+      color: var(--cyan);
+      border-color: var(--cyan);
+      box-shadow: var(--glow-cyan);
+    }
+    @media (max-width: 900px) {
+      .home-layout {
+        flex-direction: column;
+      }
+      .home-sidebar {
+        width: 100%;
+        position: static;
+        flex-direction: row;
+        flex-wrap: wrap;
+      }
+      .sidebar-stats,
+      .sidebar-block {
+        flex: 1;
+        min-width: 280px;
+      }
+    }
+    @media (max-width: 640px) {
+      .home-sidebar {
+        flex-direction: column;
+      }
+      .sidebar-stats,
+      .sidebar-block {
+        min-width: 0;
+      }
+    }
+  </style>
 </Base>

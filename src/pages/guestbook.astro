@@ -1,11 +1,12 @@
 ---
 import Base from '../layouts/Base.astro';
+import PixelIcon from '../components/PixelIcon.astro';
 ---
 
 <Base title="留言板">
   <section style="padding: 20px 0;">
     <h2 class="section-title">
-      <span class="pixel-icon">💬</span> 留言板
+      <PixelIcon name="comment" size={20} /> 留言板
     </h2>
     <p style="font-size: 14px; color: var(--text-dim); margin-bottom: 32px; font-family: var(--mono-font);">
       > echo "说点什么吧~"
@@ -20,6 +21,7 @@ import Base from '../layouts/Base.astro';
       envId: 'https://twikoo.kariiidayu.workers.dev',
       el: '#twikoo-comment',
       lang: 'zh-CN',
+      placeholder: '留下你划过这片星空的痕迹吧～',
     });
   </script>
 
@@ -46,7 +48,7 @@ import Base from '../layouts/Base.astro';
       color: var(--cyan) !important;
       border-radius: 2px !important;
       font-family: var(--pixel-font) !important;
-      font-size: 10px !important;
+      font-size: 13px !important;
     }
     :global(.tk-submit .tk-btn:hover) {
       background: rgba(0, 255, 245, 0.1) !important;

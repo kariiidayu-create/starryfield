@@ -1,0 +1,131 @@
+---
+import Base from '../layouts/Base.astro';
+import PixelIcon from '../components/PixelIcon.astro';
+import { getCollection } from 'astro:content';
+
+const allCrafts = await getCollection('crafts');
+const crafts = allCrafts.sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99));
+---
+
+<Base title="手工制作">
+  <section style="padding: 20px 0;">
+    <h2 class="section-title">
+      <PixelIcon name="scissors" size={20} /> 手工制作
+    </h2>
+    <p style="font-size: 14px; color: var(--text-dim); margin-bottom: 32px; font-family: var(--mono-font);">
+      > cat ./crafts/*.log
+    </p>
+
+    <div class="craft-grid">
+      {crafts.map(craft => (
+        <a href={`/crafts/${craft.id}`} class="craft-card" style="text-decoration: none;">
+          <div class="craft-card-img-wrap">
+            <img class="craft-card-img" src={craft.data.cover} alt={craft.data.title} />
+            <div class="craft-card-overlay">
+              <span class="craft-card-tag">{craft.data.tag}</span>
+            </div>
+          </div>
+          <div class="craft-card-body">
+            <div class="craft-card-title">{craft.data.title}</div>
+            <p class="craft-card-note">{craft.data.note}</p>
+            <span class="craft-card-date">{craft.data.date}</span>
+          </div>
+        </a>
+      ))}
+    </div>
+
+    <p style="font-family: var(--pixel-font); font-size: 13px; color: var(--text-dim); text-align: center; margin-top: 40px;">
+      // 双手创造的小世界...
+    </p>
+  </section>
+
+  <style>
+    .craft-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 20px;
+      margin-bottom: 48px;
+    }
+
+    .craft-card {
+      background: var(--bg-card);
+      border: 1px solid rgba(0, 255, 245, 0.1);
+      border-radius: 2px;
+      overflow: hidden;
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+
+    .craft-card:hover {
+      border-color: var(--magenta);
+      box-shadow: var(--glow-magenta);
+      transform: translateY(-4px);
+    }
+
+    .craft-card-img-wrap {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .craft-card-img {
+      width: 100%;
+      aspect-ratio: 4/3;
+      object-fit: cover;
+      transition: transform 0.4s;
+    }
+
+    .craft-card:hover .craft-card-img {
+      transform: scale(1.05);
+    }
+
+    .craft-card-overlay {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+    }
+
+    .craft-card-tag {
+      font-family: var(--pixel-font);
+      font-size: 14px;
+      color: var(--cyan);
+      text-shadow: var(--glow-cyan);
+      background: rgba(10, 10, 15, 0.8);
+      padding: 4px 10px;
+      border: 1px solid rgba(0, 255, 245, 0.3);
+      border-radius: 2px;
+    }
+
+    .craft-card-body {
+      padding: 16px;
+      border-top: 1px solid rgba(0, 255, 245, 0.1);
+    }
+
+    .craft-card-title {
+      font-family: var(--pixel-font);
+      font-size: 13px;
+      color: var(--text);
+      margin-bottom: 8px;
+      line-height: 1.6;
+    }
+
+    .craft-card-note {
+      font-size: 13px;
+      color: var(--text-dim);
+      line-height: 1.6;
+      margin-bottom: 8px;
+    }
+
+    .craft-card-date {
+      font-family: var(--mono-font);
+      font-size: 13px;
+      color: var(--text-dim);
+      opacity: 0.6;
+    }
+
+    @media (max-width: 640px) {
+      .craft-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</Base>

@@ -1,0 +1,128 @@
+---
+import Base from '../layouts/Base.astro';
+import PixelIcon from '../components/PixelIcon.astro';
+import { getCollection } from 'astro:content';
+
+const allDrawings = await getCollection('drawings');
+const drawings = allDrawings.sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99));
+---
+
+<Base title="绘画作品">
+  <section style="padding: 20px 0;">
+    <h2 class="section-title">
+      <PixelIcon name="palette" size={20} /> 绘画作品
+    </h2>
+    <p style="font-size: 14px; color: var(--text-dim); margin-bottom: 32px; font-family: var(--mono-font);">
+      > render ./drawings/*
+    </p>
+
+    <div class="drawing-grid">
+      {drawings.map(drawing => (
+        <a href={`/drawings/${drawing.id}`} class="drawing-card" style="text-decoration: none;">
+          <div class="drawing-card-img-wrap">
+            <img class="drawing-card-img" src={drawing.data.cover} alt={drawing.data.title} />
+            <div class="drawing-card-overlay">
+              <span class="drawing-card-tag">{drawing.data.tag}</span>
+            </div>
+          </div>
+          <div class="drawing-card-body">
+            <div class="drawing-card-title">{drawing.data.title}</div>
+            <p class="drawing-card-note">{drawing.data.note}</p>
+            <span class="drawing-card-date">{drawing.data.date}</span>
+          </div>
+        </a>
+      ))}
+    </div>
+
+    <p style="font-family: var(--pixel-font); font-size: 13px; color: var(--text-dim); text-align: center; margin-top: 40px;">
+      // 画笔加载中...
+    </p>
+  </section>
+
+  <style>
+    .drawing-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 20px;
+      margin-bottom: 48px;
+    }
+
+    .drawing-card {
+      background: var(--bg-card);
+      border: 1px solid rgba(0, 255, 245, 0.1);
+      border-radius: 2px;
+      overflow: hidden;
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+
+    .drawing-card:hover {
+      border-color: var(--purple);
+      box-shadow: 0 0 10px rgba(180, 74, 255, 0.5), 0 0 40px rgba(180, 74, 255, 0.15);
+      transform: translateY(-4px);
+    }
+
+    .drawing-card-img-wrap {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .drawing-card-img {
+      width: 100%;
+      aspect-ratio: 1/1;
+      object-fit: cover;
+      transition: transform 0.4s;
+    }
+
+    .drawing-card:hover .drawing-card-img {
+      transform: scale(1.05);
+    }
+
+    .drawing-card-overlay {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+    }
+
+    .drawing-card-tag {
+      font-family: var(--pixel-font);
+      font-size: 14px;
+      color: var(--purple);
+      background: rgba(10, 10, 15, 0.8);
+      padding: 4px 10px;
+      border: 1px solid rgba(180, 74, 255, 0.3);
+      border-radius: 2px;
+    }
+
+    .drawing-card-body {
+      padding: 16px;
+      border-top: 1px solid rgba(0, 255, 245, 0.1);
+    }
+
+    .drawing-card-title {
+      font-family: var(--pixel-font);
+      font-size: 13px;
+      color: var(--text);
+      margin-bottom: 8px;
+      line-height: 1.6;
+    }
+
+    .drawing-card-note {
+      font-size: 13px;
+      color: var(--text-dim);
+      line-height: 1.6;
+      margin-bottom: 8px;
+    }
+
+    .drawing-card-date {
+      font-family: var(--mono-font);
+      font-size: 13px;
+      color: var(--text-dim);
+      opacity: 0.6;
+    }
+
+    @media (max-width: 640px) {
+      .drawing-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</Base>

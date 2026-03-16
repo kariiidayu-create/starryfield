@@ -1,30 +1,236 @@
 ---
 import Base from '../layouts/Base.astro';
+import { getCollection } from 'astro:content';
+import PixelIcon from '../components/PixelIcon.astro';
+
+const gamesCount = (await getCollection('games')).length;
+const explorationsCount = (await getCollection('explorations')).length;
+const craftsCount = (await getCollection('crafts')).length;
+const drawingsCount = (await getCollection('drawings')).length;
+const cookingCount = (await getCollection('cooking')).length;
+
+const launchDate = new Date('2026-03-13');
+const now = new Date();
+const daysAlive = Math.floor((now.getTime() - launchDate.getTime()) / 86400000);
+
+const stats = [
+  { icon: 'gamepad', label: '游戏收藏', value: gamesCount, unit: '款' },
+  { icon: 'globe', label: '世界探索', value: explorationsCount, unit: '篇' },
+  { icon: 'scissors', label: '手工作品', value: craftsCount, unit: '件' },
+  { icon: 'palette', label: '绘画作品', value: drawingsCount, unit: '幅' },
+  { icon: 'cooking', label: '美食烹饪', value: cookingCount, unit: '道' },
+  { icon: 'star', label: '已运行', value: daysAlive, unit: '天' },
+];
+
+const timeline = [
+  { date: '2026-03-16', items: ['新增「手工制作」「绘画作品」「美食烹饪」板块', '新增更新热力图 + 日历时钟', '新增访客计数（您是第xx颗繁星）+ 浏览量', '修复留言板 CDN（jsdelivr → npmmirror）', '新增网站更新时间轴', '全站字号优化', '开机动画、随机一言、阅读进度条', '头像随机对话 + 连戳彩蛋', '像素小火箭返回顶部', '所有文章详情页添加评论区', '创意 404 页面', '最近动态时间线', '站点统计仪表盘', '移动端汉堡菜单'] },
+  { date: '2026-03-13', items: ['星原诞生 — 网站正式上线', '首页 Hero 区域（背景图 + 头像）', '「游戏收藏」板块', '「世界探索」板块', '「留言板」（Twikoo + Cloudflare D1）', '「关于」页面', '部署至 Cloudflare Pages', '域名 starryfield.space 上线'] },
+];
 ---
 
 <Base title="关于">
   <section style="padding: 20px 0; max-width: 640px;">
     <h2 class="section-title">
-      <span class="pixel-icon">✦</span> 关于星原
+      <PixelIcon name="star" size={20} /> 关于星原
     </h2>
 
     <div class="post-content">
-      <p>这是一个关于游戏、关于世界、关于一些乱七八糟的想法的地方。</p>
-
-      <p>
-        我喜欢玩游戏，喜欢在城市里闲逛，喜欢偶尔停下来想一些有的没的。
-        这个网站是用来放这些东西的。
-      </p>
-
-      <blockquote>
-        像素与霓虹之间，是一个人的漫游。
-      </blockquote>
-
-      <h2>// CONTACT</h2>
-      <p style="font-family: var(--mono-font); font-size: 14px;">
-        如果你想聊聊，可以在这里找到我：<br />
-        <span style="color: var(--cyan);">[待填写]</span>
-      </p>
+      <p>这是一片存放我生活点滴及珍贵收藏的天空，我很喜欢古早博客年代的感觉，于是建立了我的这片星空。</p>
+      <p>希望当你划过我的这片星空时，能让你看到我收集的美妙繁星。</p>
     </div>
   </section>
+
+  <!-- Stats Dashboard -->
+  <section style="padding: 20px 0; max-width: 640px;">
+    <h2 class="section-title">
+      <PixelIcon name="chart" size={20} /> 站点统计
+    </h2>
+
+    <div class="stats-grid">
+      {stats.map(s => (
+        <div class="stat-card">
+          <div class="stat-icon"><PixelIcon name={s.icon} size={24} /></div>
+          <div class="stat-value">{s.value}</div>
+          <div class="stat-label">{s.label}</div>
+          <div class="stat-unit">{s.unit}</div>
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <!-- Timeline -->
+  <section style="padding: 20px 0; max-width: 640px;">
+    <h2 class="section-title">
+      <PixelIcon name="ufo" size={20} /> 更新时间轴
+    </h2>
+
+    <div class="timeline">
+      {timeline.map((entry, idx) => (
+        <div class="timeline-entry">
+          <div class="timeline-dot" />
+          {idx < timeline.length - 1 && <div class="timeline-line" />}
+          <div class="timeline-content">
+            <div class="timeline-date">{entry.date}</div>
+            <ul class="timeline-items">
+              {entry.items.map(item => (
+                <li>{item}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      ))}
+    </div>
+
+    <p style="font-family: var(--pixel-font); font-size: 13px; color: var(--text-dim); text-align: center; margin-top: 40px;">
+      // 持续建造中...
+    </p>
+  </section>
+
+  <style>
+    /* Stats Dashboard */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid rgba(0, 255, 245, 0.1);
+      border-radius: 2px;
+      padding: 20px 16px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s;
+    }
+
+    .stat-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--cyan), var(--magenta));
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .stat-card:hover {
+      border-color: rgba(0, 255, 245, 0.3);
+    }
+
+    .stat-card:hover::before {
+      opacity: 1;
+    }
+
+    .stat-icon {
+      font-size: 24px;
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-family: var(--pixel-font);
+      font-size: 28px;
+      color: var(--cyan);
+      text-shadow: var(--glow-cyan);
+      line-height: 1.2;
+      margin-bottom: 6px;
+    }
+
+    .stat-label {
+      font-family: var(--mono-font);
+      font-size: 12px;
+      color: var(--text-dim);
+      margin-bottom: 2px;
+    }
+
+    .stat-unit {
+      font-family: var(--mono-font);
+      font-size: 11px;
+      color: var(--text-dim);
+      opacity: 0.6;
+    }
+
+    @media (max-width: 640px) {
+      .stats-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+    /* Timeline */
+    .timeline {
+      position: relative;
+      padding-left: 28px;
+    }
+
+    .timeline-entry {
+      position: relative;
+      margin-bottom: 36px;
+    }
+
+    .timeline-entry:last-child {
+      margin-bottom: 0;
+    }
+
+    .timeline-dot {
+      position: absolute;
+      left: -28px;
+      top: 6px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--cyan);
+      box-shadow: var(--glow-cyan);
+      z-index: 1;
+    }
+
+    .timeline-entry:first-child .timeline-dot {
+      width: 12px;
+      height: 12px;
+      left: -29px;
+      top: 5px;
+      animation: twinkle 2s ease-in-out infinite;
+    }
+
+    .timeline-line {
+      position: absolute;
+      left: -24px;
+      top: 18px;
+      width: 2px;
+      bottom: -36px;
+      background: linear-gradient(180deg, rgba(0, 255, 245, 0.4), rgba(0, 255, 245, 0.05));
+    }
+
+    .timeline-date {
+      font-family: var(--pixel-font);
+      font-size: 13px;
+      color: var(--cyan);
+      text-shadow: var(--glow-cyan);
+      margin-bottom: 10px;
+    }
+
+    .timeline-items {
+      list-style: none;
+      padding: 0;
+    }
+
+    .timeline-items li {
+      font-size: 14px;
+      color: var(--text-dim);
+      line-height: 1.8;
+      padding-left: 16px;
+      position: relative;
+    }
+
+    .timeline-items li::before {
+      content: '>';
+      position: absolute;
+      left: 0;
+      color: var(--cyan);
+      font-family: var(--mono-font);
+      font-size: 14px;
+    }
+  </style>
 </Base>

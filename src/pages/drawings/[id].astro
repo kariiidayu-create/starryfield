@@ -1,0 +1,58 @@
+---
+import Base from '../../layouts/Base.astro';
+import PixelIcon from '../../components/PixelIcon.astro';
+import Comments from '../../components/Comments.astro';
+import TOC from '../../components/TOC.astro';
+import { getCollection, render } from 'astro:content';
+import { getReadingTime } from '../../utils/reading-time';
+
+export async function getStaticPaths() {
+  const drawings = await getCollection('drawings');
+  return drawings.map(d => ({ params: { id: d.id }, props: { drawing: d } }));
+}
+
+const { drawing } = Astro.props;
+const { Content, headings } = await render(drawing);
+const readingTime = getReadingTime(drawing.body || '');
+---
+
+<Base title={drawing.data.title}>
+  <div class="article-layout">
+    <article style="padding: 20px 0; max-width: 700px; flex: 1; min-width: 0;">
+      <div class="post-header">
+        <div class="post-meta" style="margin-bottom: 16px;">
+          <span class="tag">{drawing.data.tag}</span>
+          <span>{drawing.data.date}</span>
+          <span class="reading-time">约 {readingTime} 分钟</span>
+        </div>
+        <h1 class="post-title">{drawing.data.title}</h1>
+        <p style="font-size: 15px; color: var(--text-dim); margin-top: 8px; font-style: italic;">{drawing.data.note}</p>
+      </div>
+      {drawing.data.process && drawing.data.process.length > 0 && (
+        <div class="process-timeline" style="margin-top: 32px;">
+          <h2 class="section-title" style="font-size: 14px;"><PixelIcon name="palette" size={20} /> 创作过程</h2>
+          <div class="process-steps">
+            {drawing.data.process.map((step: {src: string; label?: string}, i: number) => (
+              <div class="process-step">
+                <div class="process-step-num">{String(i + 1).padStart(2, '0')}</div>
+                <img src={step.src} alt={step.label || `步骤 ${i + 1}`} class="process-step-img" />
+                {step.label && <div class="process-step-label">{step.label}</div>}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+      <div style="margin-top: 24px;">
+        <img src={drawing.data.cover} alt={drawing.data.title} style="width: 100%; border-radius: 2px; border: 1px solid rgba(0,255,245,0.1);" />
+      </div>
+      <div class="post-content" style="margin-top: 32px;">
+        <Content />
+      </div>
+      <Comments />
+      <div style="margin-top: 48px; padding-top: 24px; border-top: 1px dashed rgba(0,255,245,0.15);">
+        <a href="/drawings" style="font-family: var(--pixel-font); font-size: 13px; color: var(--text-dim); text-decoration: none;">&larr; BACK TO DRAWINGS</a>
+      </div>
+    </article>
+    <TOC headings={headings} />
+  </div>
+</Base>

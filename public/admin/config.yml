@@ -1,0 +1,129 @@
+backend:
+  name: github
+  repo: kariiidayu-create/starryfield
+  branch: main
+  base_url: https://cms-auth.kariiidayu.workers.dev
+  auth_endpoint: /auth
+
+media_folder: public/images
+public_folder: /images
+
+collections:
+  - name: explorations
+    label: 世界探索
+    folder: src/content/explorations
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: 标题, name: title, widget: string }
+      - { label: 标签, name: tag, widget: string }
+      - { label: 日期, name: date, widget: string }
+      - { label: 摘要, name: excerpt, widget: string }
+      - label: 地点
+        name: location
+        widget: object
+        required: false
+        collapsed: true
+        fields:
+          - { label: 地名, name: name, widget: string }
+          - { label: 纬度, name: lat, widget: number, value_type: float }
+          - { label: 经度, name: lng, widget: number, value_type: float }
+      - { label: 正文, name: body, widget: markdown }
+
+  - name: games
+    label: 游戏收藏
+    folder: src/content/games
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: 标题, name: title, widget: string }
+      - { label: 平台, name: platform, widget: string }
+      - { label: 标签, name: tag, widget: string }
+      - { label: 封面, name: cover, widget: image, required: false }
+      - { label: 评分, name: rating, widget: string, required: false }
+      - { label: 一句话, name: note, widget: string }
+      - { label: 排序, name: order, widget: number, required: false }
+      - { label: 正文, name: body, widget: markdown }
+
+  - name: crafts
+    label: 手工制作
+    folder: src/content/crafts
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: 标题, name: title, widget: string }
+      - { label: 标签, name: tag, widget: string }
+      - { label: 日期, name: date, widget: string }
+      - { label: 封面, name: cover, widget: image }
+      - { label: 备注, name: note, widget: string }
+      - { label: 排序, name: order, widget: number, required: false }
+      - label: 创作过程
+        name: process
+        widget: list
+        required: false
+        collapsed: true
+        fields:
+          - { label: 图片, name: src, widget: image }
+          - { label: 说明, name: label, widget: string, required: false }
+      - { label: 正文, name: body, widget: markdown }
+
+  - name: drawings
+    label: 绘画作品
+    folder: src/content/drawings
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: 标题, name: title, widget: string }
+      - { label: 标签, name: tag, widget: string }
+      - { label: 日期, name: date, widget: string }
+      - { label: 封面, name: cover, widget: image }
+      - { label: 备注, name: note, widget: string }
+      - { label: 排序, name: order, widget: number, required: false }
+      - label: 创作过程
+        name: process
+        widget: list
+        required: false
+        collapsed: true
+        fields:
+          - { label: 图片, name: src, widget: image }
+          - { label: 说明, name: label, widget: string, required: false }
+      - { label: 正文, name: body, widget: markdown }
+
+  - name: cooking
+    label: 美食烹饪
+    folder: src/content/cooking
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: 标题, name: title, widget: string }
+      - { label: 标签, name: tag, widget: string }
+      - { label: 日期, name: date, widget: string }
+      - { label: 封面, name: cover, widget: image }
+      - { label: 备注, name: note, widget: string }
+      - { label: 排序, name: order, widget: number, required: false }
+      - { label: 正文, name: body, widget: markdown }
+
+  - name: photos
+    label: 相册
+    folder: src/content/photos
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: 标题, name: title, widget: string, required: false }
+      - { label: 图片, name: src, widget: image }
+      - { label: 日期, name: date, widget: string }
+      - { label: 地点, name: location, widget: string, required: false }
+      - { label: 标签, name: tags, widget: list, required: false }
+
+  - name: bookmarks
+    label: 收藏夹
+    folder: src/content/bookmarks
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: 标题, name: title, widget: string }
+      - { label: 链接, name: url, widget: string }
+      - { label: 分类, name: category, widget: string }
+      - { label: 描述, name: description, widget: string }
+      - { label: 日期, name: date, widget: string }
+      - { label: 排序, name: order, widget: number, required: false }

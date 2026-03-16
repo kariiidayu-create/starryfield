@@ -1,0 +1,158 @@
+---
+import Base from '../layouts/Base.astro';
+import PixelIcon from '../components/PixelIcon.astro';
+import { getCollection } from 'astro:content';
+
+const photos = (await getCollection('photos')).sort((a, b) => b.data.date.localeCompare(a.data.date));
+---
+
+<Base title="相册">
+  <section style="padding: 20px 0;">
+    <h2 class="section-title">
+      <PixelIcon name="camera" size={20} /> 相册
+    </h2>
+
+    {photos.length === 0 ? (
+      <p style="font-family: var(--mono-font); font-size: 14px; color: var(--text-dim); text-align: center; padding: 60px 0;">
+        // 还没有照片... 快去拍点什么吧
+      </p>
+    ) : (
+      <div class="gallery-grid">
+        {photos.map((photo, idx) => (
+          <div class="gallery-item" data-idx={idx}>
+            <img src={photo.data.src} alt={photo.data.title || ''} loading="lazy" />
+            <div class="gallery-overlay">
+              {photo.data.title && <div class="gallery-title">{photo.data.title}</div>}
+              {photo.data.location && <div class="gallery-location">&gt; {photo.data.location}</div>}
+            </div>
+          </div>
+        ))}
+      </div>
+    )}
+  </section>
+
+  <!-- Lightbox -->
+  <dialog class="lightbox" id="lightbox">
+    <button class="lightbox-close" id="lightbox-close" aria-label="关闭">&times;</button>
+    <img class="lightbox-img" id="lightbox-img" src="" alt="" />
+  </dialog>
+
+  <script>
+    const items = document.querySelectorAll('.gallery-item');
+    const dialog = document.getElementById('lightbox') as HTMLDialogElement;
+    const lbImg = document.getElementById('lightbox-img') as HTMLImageElement;
+    const lbClose = document.getElementById('lightbox-close');
+
+    items.forEach(item => {
+      item.addEventListener('click', () => {
+        const img = item.querySelector('img');
+        if (img && dialog) {
+          lbImg.src = img.src;
+          lbImg.alt = img.alt;
+          dialog.showModal();
+        }
+      });
+    });
+
+    lbClose?.addEventListener('click', () => dialog?.close());
+    dialog?.addEventListener('click', (e) => {
+      if (e.target === dialog) dialog.close();
+    });
+  </script>
+
+  <style>
+    .gallery-grid {
+      column-count: 3;
+      column-gap: 12px;
+    }
+
+    .gallery-item {
+      break-inside: avoid;
+      margin-bottom: 12px;
+      position: relative;
+      border-radius: 2px;
+      overflow: hidden;
+      cursor: pointer;
+      border: 1px solid rgba(0, 255, 245, 0.1);
+      transition: all 0.3s;
+    }
+
+    .gallery-item:hover {
+      border-color: rgba(0, 255, 245, 0.4);
+      box-shadow: var(--glow-cyan);
+    }
+
+    .gallery-item img {
+      width: 100%;
+      display: block;
+    }
+
+    .gallery-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 12px;
+      background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .gallery-item:hover .gallery-overlay {
+      opacity: 1;
+    }
+
+    .gallery-title {
+      font-size: 14px;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .gallery-location {
+      font-family: var(--mono-font);
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    /* Lightbox */
+    .lightbox {
+      border: none;
+      background: rgba(0, 0, 0, 0.9);
+      max-width: 90vw;
+      max-height: 90vh;
+      padding: 0;
+      border-radius: 2px;
+    }
+
+    .lightbox::backdrop {
+      background: rgba(0, 0, 0, 0.85);
+    }
+
+    .lightbox-img {
+      max-width: 90vw;
+      max-height: 85vh;
+      object-fit: contain;
+      display: block;
+    }
+
+    .lightbox-close {
+      position: absolute;
+      top: -36px;
+      right: 0;
+      background: none;
+      border: none;
+      color: var(--cyan);
+      font-size: 28px;
+      cursor: pointer;
+      line-height: 1;
+    }
+
+    @media (max-width: 900px) {
+      .gallery-grid { column-count: 2; }
+    }
+
+    @media (max-width: 480px) {
+      .gallery-grid { column-count: 1; }
+    }
+  </style>
+</Base>

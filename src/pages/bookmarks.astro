@@ -1,0 +1,136 @@
+---
+import Base from '../layouts/Base.astro';
+import PixelIcon from '../components/PixelIcon.astro';
+import { getCollection } from 'astro:content';
+
+const all = (await getCollection('bookmarks')).sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99));
+const categories = [...new Set(all.map(b => b.data.category))];
+---
+
+<Base title="收藏夹">
+  <section style="padding: 20px 0; max-width: 800px;">
+    <h2 class="section-title">
+      <PixelIcon name="bookmark" size={20} /> 收藏夹
+    </h2>
+
+    <div class="bm-tabs" id="bm-tabs">
+      <button class="bm-tab active" data-cat="all">ALL</button>
+      {categories.map(cat => (
+        <button class="bm-tab" data-cat={cat}>{cat}</button>
+      ))}
+    </div>
+
+    <div class="bm-grid" id="bm-grid">
+      {all.map(bm => (
+        <a href={bm.data.url} target="_blank" rel="noopener" class="bm-card" data-cat={bm.data.category}>
+          <div class="bm-card-cat">{bm.data.category}</div>
+          <div class="bm-card-title">{bm.data.title} <span class="bm-ext">↗</span></div>
+          <div class="bm-card-desc">{bm.data.description}</div>
+        </a>
+      ))}
+    </div>
+
+    {all.length === 0 && (
+      <p style="font-family: var(--mono-font); font-size: 14px; color: var(--text-dim); text-align: center; padding: 60px 0;">
+        // 收藏夹空空如也...
+      </p>
+    )}
+  </section>
+
+  <script>
+    const tabs = document.querySelectorAll('.bm-tab');
+    const cards = document.querySelectorAll('.bm-card');
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        tabs.forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        const cat = tab.getAttribute('data-cat');
+        cards.forEach(card => {
+          const el = card as HTMLElement;
+          if (cat === 'all' || card.getAttribute('data-cat') === cat) {
+            el.style.display = '';
+          } else {
+            el.style.display = 'none';
+          }
+        });
+      });
+    });
+  </script>
+
+  <style>
+    .bm-tabs {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 24px;
+    }
+
+    .bm-tab {
+      font-family: var(--pixel-font);
+      font-size: 11px;
+      color: var(--text-dim);
+      background: var(--bg-card);
+      border: 1px solid rgba(0, 255, 245, 0.15);
+      border-radius: 2px;
+      padding: 6px 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .bm-tab:hover,
+    .bm-tab.active {
+      color: var(--cyan);
+      border-color: var(--cyan);
+      box-shadow: var(--glow-cyan);
+    }
+
+    .bm-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 16px;
+    }
+
+    .bm-card {
+      background: var(--bg-card);
+      border: 1px solid rgba(0, 255, 245, 0.1);
+      border-radius: 2px;
+      padding: 20px;
+      text-decoration: none;
+      transition: all 0.3s;
+      display: block;
+    }
+
+    .bm-card:hover {
+      border-color: rgba(0, 255, 245, 0.4);
+      transform: translateY(-2px);
+      box-shadow: var(--glow-cyan);
+    }
+
+    .bm-card-cat {
+      font-family: var(--pixel-font);
+      font-size: 10px;
+      color: var(--cyan);
+      text-shadow: var(--glow-cyan);
+      margin-bottom: 8px;
+    }
+
+    .bm-card-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    .bm-ext {
+      font-size: 12px;
+      color: var(--text-dim);
+      opacity: 0.5;
+    }
+
+    .bm-card-desc {
+      font-size: 14px;
+      color: var(--text-dim);
+      line-height: 1.6;
+    }
+  </style>
+</Base>

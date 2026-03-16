@@ -18,19 +18,73 @@ const pageTitle = title === 'STARRYFIELD' ? title : `${title} | STARRYFIELD`;
     <meta name="description" content={description} />
     <title>{pageTitle}</title>
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <script is:inline>
+      (function() {
+        const t = localStorage.getItem('sf-theme');
+        if (t === 'light') document.documentElement.setAttribute('data-theme', 'light');
+      })();
+    </script>
   </head>
   <body>
+    <!-- Boot sequence overlay -->
+    <div class="boot-overlay" id="boot-overlay">
+      <div class="boot-screen">
+        <div class="boot-lines" id="boot-lines"></div>
+        <div class="boot-cursor">_</div>
+      </div>
+    </div>
+
+    <!-- Reading progress bar -->
+    <div class="reading-progress" id="reading-progress"></div>
+
+    <!-- Back to top -->
+    <button class="back-to-top" id="back-to-top" aria-label="返回顶部">
+      <svg class="rocket-icon" viewBox="0 0 16 16" width="20" height="20">
+        <!-- Pixel rocket -->
+        <rect x="7" y="0" width="2" height="2" fill="var(--cyan)"/>
+        <rect x="6" y="2" width="4" height="2" fill="var(--cyan)"/>
+        <rect x="5" y="4" width="6" height="2" fill="var(--cyan)"/>
+        <rect x="5" y="6" width="6" height="2" fill="var(--cyan)"/>
+        <rect x="6" y="8" width="4" height="2" fill="var(--cyan)"/>
+        <rect x="3" y="6" width="2" height="4" fill="var(--magenta)"/>
+        <rect x="11" y="6" width="2" height="4" fill="var(--magenta)"/>
+        <rect x="6" y="10" width="4" height="2" fill="var(--magenta)"/>
+        <rect x="7" y="12" width="2" height="2" fill="#ff6600"/>
+        <rect x="6" y="14" width="1" height="2" fill="#ffcc00"/>
+        <rect x="9" y="14" width="1" height="2" fill="#ffcc00"/>
+      </svg>
+    </button>
+
     <!-- Starfield background -->
     <div class="starfield" id="starfield"></div>
 
     <div class="container">
       <header class="site-header">
         <h1 class="site-title glitch"><a href="/">STARRYFIELD</a></h1>
-        <p class="site-subtitle">// 星原 — 一个人的游戏与世界</p>
-        <nav class="site-nav">
+        <p class="site-subtitle">// 星原 - 繁星栖息之所</p>
+
+        <!-- Theme toggle -->
+        <button class="theme-toggle" id="theme-toggle" aria-label="切换主题">
+          <svg class="theme-icon" id="theme-icon-moon" viewBox="0 0 16 16" width="18" height="18" fill="none"><path d="M12 8a5 5 0 01-5 5 5 5 0 01-5-5 5 5 0 015-5c0 0-1 2-1 4s2 4 2 4a5 5 0 004-4z" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+          <svg class="theme-icon" id="theme-icon-sun" viewBox="0 0 16 16" width="18" height="18" fill="none" style="display:none;"><circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="1.5" fill="none"/><line x1="8" y1="1" x2="8" y2="3" stroke="currentColor" stroke-width="1.5"/><line x1="8" y1="13" x2="8" y2="15" stroke="currentColor" stroke-width="1.5"/><line x1="1" y1="8" x2="3" y2="8" stroke="currentColor" stroke-width="1.5"/><line x1="13" y1="8" x2="15" y2="8" stroke="currentColor" stroke-width="1.5"/><line x1="3" y1="3" x2="4.5" y2="4.5" stroke="currentColor" stroke-width="1.5"/><line x1="11.5" y1="11.5" x2="13" y2="13" stroke="currentColor" stroke-width="1.5"/><line x1="3" y1="13" x2="4.5" y2="11.5" stroke="currentColor" stroke-width="1.5"/><line x1="11.5" y1="4.5" x2="13" y2="3" stroke="currentColor" stroke-width="1.5"/></svg>
+        </button>
+
+        <!-- Mobile hamburger -->
+        <button class="hamburger" id="hamburger" aria-label="菜单">
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+          <span class="hamburger-line"></span>
+        </button>
+
+        <nav class="site-nav" id="site-nav">
           <a href="/">首页</a>
           <a href="/games">游戏收藏</a>
           <a href="/explorations">世界探索</a>
+          <a href="/crafts">手工制作</a>
+          <a href="/drawings">绘画作品</a>
+          <a href="/cooking">美食烹饪</a>
+          <a href="/gallery">相册</a>
+          <a href="/bookmarks">收藏夹</a>
           <a href="/guestbook">留言板</a>
           <a href="/about">关于</a>
         </nav>
@@ -41,9 +95,68 @@ const pageTitle = title === 'STARRYFIELD' ? title : `${title} | STARRYFIELD`;
       </main>
 
       <footer class="site-footer">
-        <p>STARRYFIELD © 2026 · BUILT WITH ♥ AND PIXELS</p>
+        <div class="star-counter">
+          <span class="star-counter-icon"><svg viewBox="0 0 16 16" width="14" height="14" fill="none" style="display:inline-block;vertical-align:-0.15em;"><polygon points="8,0 10,6 16,6 11,10 13,16 8,12 3,16 5,10 0,6 6,6" fill="currentColor"/></svg></span>
+          您是第 <span id="star-count" class="star-count-num">--</span> 颗繁星
+        </div>
+        <div class="page-views" id="page-views"></div>
+        <p>STARRYFIELD © 2026 · BUILT WITH <span style="font-size: 24px; vertical-align: middle; position: relative; top: -2px;">🦭</span> AND PIXELS</p>
       </footer>
     </div>
+
+    <script>
+      // Boot sequence
+      (function () {
+        const overlay = document.getElementById('boot-overlay');
+        if (!overlay) return;
+
+        // Skip if already seen this session
+        if (sessionStorage.getItem('sf-booted')) {
+          overlay.remove();
+          return;
+        }
+
+        const lines = [
+          { text: '> STARRYFIELD SYSTEM v2.6.03', delay: 0 },
+          { text: '> LOADING PIXEL MATRIX.......... OK', delay: 300 },
+          { text: '> CONNECTING NEON GRID.......... OK', delay: 600 },
+          { text: '> SCANNING STAR COORDINATES..... OK', delay: 900 },
+          { text: '> INITIALIZING MEMORY BANK...... OK', delay: 1200 },
+          { text: '> ALL SYSTEMS ONLINE.', delay: 1600 },
+          { text: '', delay: 1800 },
+          { text: '> WELCOME TO STARRYFIELD *', delay: 2000 },
+        ];
+
+        const container = document.getElementById('boot-lines');
+        lines.forEach(({ text, delay }) => {
+          setTimeout(() => {
+            const line = document.createElement('div');
+            line.className = 'boot-line';
+            // Colorize OK
+            if (text.includes(' OK')) {
+              const parts = text.split(' OK');
+              line.innerHTML = parts[0] + ' <span class="boot-ok">OK</span>';
+            } else if (text.includes('WELCOME')) {
+              line.classList.add('boot-welcome');
+              line.textContent = text;
+            } else {
+              line.textContent = text;
+            }
+            container.appendChild(line);
+            container.scrollTop = container.scrollHeight;
+          }, delay);
+        });
+
+        // Fade out
+        setTimeout(() => {
+          overlay.classList.add('boot-fade');
+          setTimeout(() => {
+            overlay.remove();
+            sessionStorage.setItem('sf-booted', '1');
+          }, 600);
+        }, 2800);
+      })();
+    </script>
 
     <script>
       // Generate starfield
@@ -62,6 +175,19 @@ const pageTitle = title === 'STARRYFIELD' ? title : `${title} | STARRYFIELD`;
           }
           starfield.appendChild(star);
         }
+
+        // Shooting stars
+        function shootStar() {
+          const meteor = document.createElement('div');
+          meteor.className = 'shooting-star';
+          meteor.style.top = Math.random() * 60 + '%';
+          meteor.style.left = Math.random() * 80 + '%';
+          meteor.style.setProperty('--angle', (25 + Math.random() * 20) + 'deg');
+          starfield.appendChild(meteor);
+          meteor.addEventListener('animationend', () => meteor.remove());
+          setTimeout(shootStar, 4000 + Math.random() * 8000);
+        }
+        setTimeout(shootStar, 2000 + Math.random() * 5000);
       }
 
       // Active nav link
@@ -71,6 +197,125 @@ const pageTitle = title === 'STARRYFIELD' ? title : `${title} | STARRYFIELD`;
         const href = link.getAttribute('href');
         if (href === '/' && path === '/') link.classList.add('active');
         else if (href !== '/' && path.startsWith(href)) link.classList.add('active');
+      });
+
+      // Reading progress bar + back to top
+      const progressBar = document.getElementById('reading-progress');
+      const backToTop = document.getElementById('back-to-top');
+      window.addEventListener('scroll', () => {
+        const scrollTop = document.documentElement.scrollTop;
+        const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        if (progressBar && scrollHeight > 0) {
+          progressBar.style.width = (scrollTop / scrollHeight * 100) + '%';
+        }
+        if (backToTop) {
+          backToTop.classList.toggle('visible', scrollTop > 300);
+        }
+      });
+      if (backToTop) {
+        backToTop.addEventListener('click', () => {
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+      }
+
+      // Theme toggle
+      const themeToggle = document.getElementById('theme-toggle');
+      const iconMoon = document.getElementById('theme-icon-moon');
+      const iconSun = document.getElementById('theme-icon-sun');
+      if (themeToggle && iconMoon && iconSun) {
+        const isLight = () => document.documentElement.getAttribute('data-theme') === 'light';
+        const updateIcon = () => {
+          iconMoon.style.display = isLight() ? 'none' : 'block';
+          iconSun.style.display = isLight() ? 'block' : 'none';
+        };
+        updateIcon();
+        themeToggle.addEventListener('click', () => {
+          if (isLight()) {
+            document.documentElement.removeAttribute('data-theme');
+            localStorage.setItem('sf-theme', 'dark');
+          } else {
+            document.documentElement.setAttribute('data-theme', 'light');
+            localStorage.setItem('sf-theme', 'light');
+          }
+          updateIcon();
+        });
+      }
+
+      // Hamburger menu
+      const hamburger = document.getElementById('hamburger');
+      const siteNav = document.getElementById('site-nav');
+      if (hamburger && siteNav) {
+        hamburger.addEventListener('click', () => {
+          hamburger.classList.toggle('active');
+          siteNav.classList.toggle('open');
+          document.body.classList.toggle('nav-open');
+        });
+        siteNav.querySelectorAll('a').forEach(link => {
+          link.addEventListener('click', () => {
+            hamburger.classList.remove('active');
+            siteNav.classList.remove('open');
+            document.body.classList.remove('nav-open');
+          });
+        });
+      }
+
+      // Visitor counter via Twikoo COUNTER_GET (once per session)
+      (async () => {
+        const TWIKOO = 'https://twikoo.kariiidayu.workers.dev';
+        const post = (body) => fetch(TWIKOO, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        }).then(r => r.json());
+        try {
+          // Total star count: only request once per session, cache the result
+          const cached = sessionStorage.getItem('sf-star-count');
+          let totalCount = cached;
+          if (!cached) {
+            const totalRes = await post({ event: 'COUNTER_GET', url: '__starryfield_total__', title: 'total' });
+            if (totalRes.time) {
+              totalCount = String(totalRes.time);
+              sessionStorage.setItem('sf-star-count', totalCount);
+            }
+          }
+          const starEl = document.getElementById('star-count');
+          if (starEl && totalCount) starEl.textContent = totalCount;
+
+          // Page views still count per page
+          const pageRes = await post({ event: 'COUNTER_GET', url: window.location.pathname, title: document.title });
+          const pvEl = document.getElementById('page-views');
+          if (pvEl && pageRes.time) pvEl.textContent = '本页浏览 ' + pageRes.time + ' 次';
+        } catch (e) {}
+      })();
+
+      // Click star effect
+      const starColors = ['#00fff5','#ff00ff','#ffcc00','#39ff14','#b44aff','#ff6b6b','#00ccff','#ff9500'];
+      document.addEventListener('click', (e) => {
+        const star = document.createElement('div');
+        star.className = 'click-star';
+        const color = starColors[Math.floor(Math.random() * starColors.length)];
+        star.innerHTML = '<svg viewBox="0 0 16 16" width="20" height="20"><polygon points="8,0 10,6 16,6 11,10 13,16 8,12 3,16 5,10 0,6 6,6" fill="' + color + '"/></svg>';
+        star.style.left = e.clientX + 'px';
+        star.style.top = e.clientY + 'px';
+        document.body.appendChild(star);
+        star.addEventListener('animationend', () => star.remove());
+      });
+
+      // Mouse trail effect
+      let trailThrottle = 0;
+      document.addEventListener('mousemove', (e) => {
+        const now = Date.now();
+        if (now - trailThrottle < 40) return;
+        trailThrottle = now;
+        const dot = document.createElement('div');
+        dot.className = 'mouse-trail';
+        dot.style.left = e.clientX + 'px';
+        dot.style.top = e.clientY + 'px';
+        const tc = starColors[Math.floor(Math.random() * starColors.length)];
+        dot.style.background = tc;
+        dot.style.setProperty('--trail-color', tc);
+        document.body.appendChild(dot);
+        dot.addEventListener('animationend', () => dot.remove());
       });
     </script>
   </body>

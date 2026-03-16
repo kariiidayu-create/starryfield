@@ -1,16 +1,36 @@
 ---
 import Base from '../layouts/Base.astro';
+import PixelIcon from '../components/PixelIcon.astro';
 import { getCollection } from 'astro:content';
 
 const allPosts = await getCollection('explorations');
 const posts = allPosts.sort((a, b) => b.data.date.localeCompare(a.data.date));
+
+// Locations for the map
+const locations = allPosts
+  .filter(p => p.data.location)
+  .map(p => ({
+    name: p.data.location!.name,
+    lat: p.data.location!.lat,
+    lng: p.data.location!.lng,
+    title: p.data.title,
+    href: `/explorations/${p.id}`,
+  }));
 ---
 
 <Base title="世界探索">
   <section style="padding: 20px 0;">
     <h2 class="section-title">
-      <span class="pixel-icon">🌍</span> 世界探索
+      <PixelIcon name="globe" size={20} /> 世界探索
     </h2>
+
+    <!-- Exploration Map -->
+    {locations.length > 0 && (
+      <div class="exploration-map-wrap" style="margin-bottom: 40px;">
+        <div id="exploration-map" style="width: 100%; height: 400px; border-radius: 2px; border: 1px solid rgba(0, 255, 245, 0.15);"></div>
+      </div>
+    )}
+
     <p style="font-size: 14px; color: var(--text-dim); margin-bottom: 32px; font-family: var(--mono-font);">
       > ls ./explorations/
     </p>
@@ -26,8 +46,37 @@ const posts = allPosts.sort((a, b) => b.data.date.localeCompare(a.data.date));
       </a>
     ))}
 
-    <p style="font-family: var(--pixel-font); font-size: 10px; color: var(--text-dim); text-align: center; margin-top: 40px;">
+    <p style="font-family: var(--pixel-font); font-size: 13px; color: var(--text-dim); text-align: center; margin-top: 40px;">
       // 更多探索进行中...
     </p>
   </section>
+
+  {locations.length > 0 && (
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script is:inline define:vars={{ locations }}>
+      const script = document.createElement('script');
+      script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+      script.onload = () => {
+        const map = L.map('exploration-map').setView([31.23, 121.47], 4);
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+          attribution: '&copy; OpenStreetMap &copy; CARTO',
+          maxZoom: 18,
+        }).addTo(map);
+
+        const icon = L.divIcon({
+          className: 'map-marker',
+          html: '<div style="width:12px;height:12px;border-radius:50%;background:#00fff5;box-shadow:0 0 10px rgba(0,255,245,0.6),0 0 30px rgba(0,255,245,0.2);border:2px solid rgba(0,255,245,0.8);"></div>',
+          iconSize: [12, 12],
+          iconAnchor: [6, 6],
+        });
+
+        locations.forEach(loc => {
+          L.marker([loc.lat, loc.lng], { icon })
+            .addTo(map)
+            .bindPopup(`<a href="${loc.href}" style="color:#00fff5;text-decoration:none;font-family:monospace;">${loc.title}</a><br><span style="color:#aaa;font-size:12px;">${loc.name}</span>`);
+        });
+      };
+      document.head.appendChild(script);
+    </script>
+  )}
 </Base>
