@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import PixelPet from '../components/PixelPet.astro';
 
 interface Props {
   title?: string;
@@ -55,6 +56,9 @@ const pageTitle = title === 'STARRYFIELD' ? title : `${title} | STARRYFIELD`;
         <rect x="9" y="14" width="1" height="2" fill="#ffcc00"/>
       </svg>
     </button>
+
+    <!-- Pixel pet seal -->
+    <PixelPet />
 
     <!-- Starfield background -->
     <div class="starfield" id="starfield"></div>
