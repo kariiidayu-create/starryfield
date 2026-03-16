@@ -1,0 +1,144 @@
+---
+// No props needed - uses window.location.pathname client-side
+---
+
+<div class="reactions-box" id="reactions-box">
+  <div class="reactions-title">// REACTIONS</div>
+  <div class="reactions-row">
+    <button class="reaction-btn" data-type="fire">
+      <span class="reaction-label">[超赞]</span>
+      <span class="reaction-count" data-count="fire">0</span>
+    </button>
+    <button class="reaction-btn" data-type="useful">
+      <span class="reaction-label">[有用]</span>
+      <span class="reaction-count" data-count="useful">0</span>
+    </button>
+    <button class="reaction-btn" data-type="love">
+      <span class="reaction-label">[喜欢]</span>
+      <span class="reaction-count" data-count="love">0</span>
+    </button>
+    <button class="reaction-btn" data-type="fun">
+      <span class="reaction-label">[好玩]</span>
+      <span class="reaction-count" data-count="fun">0</span>
+    </button>
+  </div>
+</div>
+
+<script>
+  (function () {
+    const box = document.getElementById('reactions-box');
+    if (!box) return;
+
+    const path = window.location.pathname;
+    const storageKey = 'sf-reactions-' + path;
+    const votedKey = 'sf-reacted-' + path;
+
+    // Load counts
+    function getCounts(): Record<string, number> {
+      try {
+        return JSON.parse(localStorage.getItem(storageKey) || '{}');
+      } catch { return {}; }
+    }
+
+    function getVoted(): Record<string, boolean> {
+      try {
+        return JSON.parse(localStorage.getItem(votedKey) || '{}');
+      } catch { return {}; }
+    }
+
+    function render() {
+      const counts = getCounts();
+      const voted = getVoted();
+      box.querySelectorAll('.reaction-btn').forEach(btn => {
+        const type = (btn as HTMLElement).dataset.type!;
+        const countEl = btn.querySelector(`[data-count="${type}"]`);
+        if (countEl) countEl.textContent = String(counts[type] || 0);
+        if (voted[type]) {
+          btn.classList.add('reacted');
+        } else {
+          btn.classList.remove('reacted');
+        }
+      });
+    }
+
+    render();
+
+    box.querySelectorAll('.reaction-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const type = (btn as HTMLElement).dataset.type!;
+        const voted = getVoted();
+        if (voted[type]) return; // already reacted
+
+        const counts = getCounts();
+        counts[type] = (counts[type] || 0) + 1;
+        voted[type] = true;
+        localStorage.setItem(storageKey, JSON.stringify(counts));
+        localStorage.setItem(votedKey, JSON.stringify(voted));
+        render();
+      });
+    });
+  })();
+</script>
+
+<style>
+  .reactions-box {
+    margin-top: 40px;
+    margin-bottom: 12px;
+    padding: 16px;
+    background: var(--bg-card);
+    border: 1px solid rgba(0, 255, 245, 0.1);
+    border-radius: 2px;
+  }
+
+  .reactions-title {
+    font-family: var(--pixel-font);
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-bottom: 12px;
+    opacity: 0.6;
+  }
+
+  .reactions-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .reaction-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--bg-deep);
+    border: 1px solid rgba(0, 255, 245, 0.1);
+    border-radius: 2px;
+    padding: 6px 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: var(--pixel-font);
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+
+  .reaction-btn:hover {
+    border-color: rgba(0, 255, 245, 0.3);
+    color: var(--text);
+  }
+
+  .reaction-btn.reacted {
+    border-color: var(--cyan);
+    color: var(--cyan);
+    text-shadow: var(--glow-cyan);
+    box-shadow: 0 0 8px rgba(0, 255, 245, 0.15);
+  }
+
+  .reaction-btn.reacted .reaction-label {
+    color: var(--cyan);
+  }
+
+  .reaction-count {
+    font-family: var(--mono-font);
+    font-size: 11px;
+    min-width: 12px;
+    text-align: center;
+  }
+</style>

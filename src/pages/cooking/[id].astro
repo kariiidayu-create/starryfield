@@ -1,6 +1,7 @@
 ---
 import Base from '../../layouts/Base.astro';
 import Comments from '../../components/Comments.astro';
+import Reactions from '../../components/Reactions.astro';
 import TOC from '../../components/TOC.astro';
 import { getCollection, render } from 'astro:content';
 import { getReadingTime } from '../../utils/reading-time';
@@ -33,6 +34,7 @@ const readingTime = getReadingTime(dish.body || '');
       <div class="post-content" style="margin-top: 32px;">
         <Content />
       </div>
+      <Reactions />
       <Comments />
       <div style="margin-top: 48px; padding-top: 24px; border-top: 1px dashed rgba(0,255,245,0.15);">
         <a href="/cooking" style="font-family: var(--pixel-font); font-size: 13px; color: var(--text-dim); text-decoration: none;">&larr; BACK TO COOKING</a>
