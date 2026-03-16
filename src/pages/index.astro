@@ -124,7 +124,7 @@ const stats = [
         </div>
       </div>
       <div class="now-status" id="now-status"></div>
-      <div class="social-links" style="margin-top: 12px; margin-bottom: 20px;">
+      <div class="social-links">
         <button class="social-icon" title="微信" aria-label="微信" data-qr="/images/qr-weixin.jpg">
           <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M9.5 4C5.36 4 2 6.69 2 10c0 1.89 1.08 3.56 2.78 4.66L4 17l2.5-1.18C7.47 16.27 8.47 16.5 9.5 16.5c.17 0 .34 0 .5-.02C9.68 15.99 9.5 15.52 9.5 15c0-3.04 2.69-5.5 6-5.5.17 0 .34.01.5.02C15.59 6.35 12.86 4 9.5 4zM7 9a1 1 0 110-2 1 1 0 010 2zm5 0a1 1 0 110-2 1 1 0 010 2zm3.5 3c-2.97 0-5.5 2.02-5.5 4.5s2.53 4.5 5.5 4.5c.88 0 1.7-.18 2.43-.5L20 21.5l-.6-2.05C20.95 18.42 21 17.5 21 16.5c0-2.48-2.53-4.5-5.5-4.5zm-1.5 3a.75.75 0 110-1.5.75.75 0 010 1.5zm3 0a.75.75 0 110-1.5.75.75 0 010 1.5z"/></svg>
         </button>
@@ -145,7 +145,7 @@ const stats = [
         <img id="qr-img" src="" alt="二维码" style="display:none;" />
         <div id="qr-text" style="display:none; font-family: var(--mono-font); font-size: 15px; color: var(--cyan); text-align: center; padding: 20px 10px; word-break: break-all;"></div>
       </dialog>
-      <p style="font-size: 15px; color: var(--text-dim); line-height: 1.8; max-width: 600px;">
+      <p style="font-size: 15px; color: var(--text-dim); line-height: 1.8; max-width: 600px; margin-left: 24px;">
         我是<span style="color: var(--cyan);">星见眠</span>，可以叫我阿眠。<br />
         一个在现实里打MMO的数字游民，在这里记录她的冒险日志。<br />
         天赋永远不会过期，地图永远没有开完 :)
@@ -254,7 +254,9 @@ const stats = [
     .social-links {
       display: flex;
       gap: 12px;
-      margin-top: 20px;
+      margin-top: 12px;
+      margin-bottom: 20px;
+      margin-left: 24px;
     }
     .social-icon {
       color: var(--text-dim);
