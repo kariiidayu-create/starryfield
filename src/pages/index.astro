@@ -180,11 +180,14 @@ const stats = [
     .hero-bg::after {
       content: '';
       position: absolute;
-      bottom: 0;
+      top: 0;
       left: 0;
       right: 0;
-      height: 60%;
-      background: linear-gradient(transparent, var(--bg-deep));
+      bottom: 0;
+      background:
+        linear-gradient(to bottom, transparent 40%, var(--bg-deep)),
+        linear-gradient(to right, var(--bg-deep), transparent 30%, transparent 70%, var(--bg-deep)),
+        linear-gradient(to bottom, var(--bg-deep), transparent 20%);
     }
     .hero-content {
       position: relative;

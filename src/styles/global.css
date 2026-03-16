@@ -840,6 +840,16 @@ html[data-theme="light"] .site-footer {
   border-top-color: rgba(0, 153, 170, 0.15);
 }
 
+html[data-theme="light"] .now-status {
+  color: #007788;
+  font-weight: 700;
+}
+
+html[data-theme="light"] .now-dot {
+  background: #00aa44;
+  box-shadow: 0 0 6px #00aa44;
+}
+
 html[data-theme="light"] .boot-overlay {
   background: #f0f0f5;
 }
