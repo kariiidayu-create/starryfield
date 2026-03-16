@@ -896,7 +896,8 @@ body.nav-open {
   .hamburger { top: 24px; right: 44px; }
   .game-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
   .container { padding: 0 16px; max-width: 100%; }
-  .hero-bg { left: -16px; right: -16px; }
+  .hero-section { margin-left: -16px; margin-right: -16px; padding-left: 16px; padding-right: 16px; }
+  .hero-bg { left: 0; right: 0; }
 
   .hamburger {
     display: flex;
