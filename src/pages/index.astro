@@ -403,26 +403,29 @@ const stats = [
     </div>
   </section>
 
-  <script>
+  <script is:inline>
     // Now status based on time (UTC+8)
     (function() {
-      const el = document.getElementById('now-status');
+      var el = document.getElementById('now-status');
       if (!el) return;
-      const hour = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Shanghai' })).getHours();
-      let icon, text;
+      var d = new Date(new Date().toLocaleString('en-US', { timeZone: 'Asia/Shanghai' }));
+      var hour = d.getHours();
+      var icon, text;
       if (hour >= 9 && hour < 18) {
         icon = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none"><rect x="1" y="5" width="14" height="9" rx="1" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M5 5V3a3 3 0 016 0v2" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>';
         text = '上班中';
-      } else if (hour >= 20 || (hour >= 18 && hour < 20)) {
+      } else if (hour >= 18) {
         icon = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none"><rect x="2" y="5" width="12" height="8" rx="1" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="5" y="7" width="2" height="1" fill="currentColor"/><rect x="6" y="6" width="1" height="3" fill="currentColor"/><rect x="10" y="7" width="1" height="1" fill="currentColor"/><rect x="12" y="7" width="1" height="1" fill="currentColor"/></svg>';
         text = '打游戏中';
       } else {
-        icon = '<svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><text x="0" y="12" font-size="10" font-family="var(--pixel-font)" fill="currentColor">zzz</text></svg>';
+        icon = '<svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor"><text x="0" y="12" font-size="10" font-family="monospace" fill="currentColor">zzz</text></svg>';
         text = '睡觉中';
       }
       el.innerHTML = '<span class="now-dot"></span>' + icon + ' ' + text;
     })();
+  </script>
 
+  <script>
     // QR / email modal
     const qrModal = document.getElementById('qr-modal') as HTMLDialogElement;
     const qrImg = document.getElementById('qr-img') as HTMLImageElement;
