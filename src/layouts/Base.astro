@@ -220,6 +220,11 @@ const pageTitle = title === 'STARRYFIELD' ? title : `${title} | STARRYFIELD`;
       if (backToTop) {
         backToTop.addEventListener('click', () => {
           window.scrollTo({ top: 0, behavior: 'smooth' });
+          // Rocket launch animation
+          backToTop.classList.add('launching');
+          setTimeout(() => {
+            backToTop.classList.remove('launching');
+          }, 1000);
         });
       }
 
