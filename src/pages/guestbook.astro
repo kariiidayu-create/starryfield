@@ -8,9 +8,17 @@ import PixelIcon from '../components/PixelIcon.astro';
     <h2 class="section-title">
       <PixelIcon name="comment" size={20} /> 留言板
     </h2>
-    <p style="font-size: 14px; color: var(--text-dim); margin-bottom: 32px; font-family: var(--mono-font);">
+    <p style="font-size: 14px; color: var(--text-dim); margin-bottom: 16px; font-family: var(--mono-font);">
       > echo "说点什么吧~"
     </p>
+    <details style="font-size: 13px; color: var(--text-dim); margin-bottom: 32px; font-family: var(--mono-font);">
+      <summary style="cursor: pointer; color: var(--cyan); font-size: 12px;">// TIP: 如何获得评论头像？</summary>
+      <div style="margin-top: 8px; padding-left: 16px; line-height: 1.8;">
+        1. 前往 <a href="https://gravatar.com" target="_blank" rel="noopener">gravatar.com</a> 注册（用你留言时填的邮箱）<br />
+        2. 上传你想要的头像<br />
+        3. 之后用这个邮箱留言就会自动显示头像
+      </div>
+    </details>
 
     <div id="twikoo-comment"></div>
   </section>
