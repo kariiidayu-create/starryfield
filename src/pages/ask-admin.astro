@@ -1,0 +1,192 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base title="Ask Admin">
+  <div class="admin-page">
+    <h1 class="section-title" style="font-size: 18px;">// ASK ADMIN</h1>
+
+    <!-- 登录 -->
+    <div id="login-wrap">
+      <div class="admin-login">
+        <label class="form-label">// PASSWORD</label>
+        <input type="password" id="admin-pwd" class="form-input" placeholder="输入管理密码" />
+        <button class="admin-btn" id="login-btn">登录</button>
+        <div class="admin-feedback" id="login-feedback"></div>
+      </div>
+    </div>
+
+    <!-- 管理面板（登录后显示） -->
+    <div id="admin-panel" style="display:none;">
+      <div style="display:flex;gap:12px;margin-bottom:32px;flex-wrap:wrap;">
+        <button class="tab-btn active" id="tab-pending" onclick="switchTab('pending')">待回答</button>
+        <button class="tab-btn" id="tab-answered" onclick="switchTab('answered')">已回答</button>
+        <button class="admin-btn" style="margin-left:auto;" onclick="logout()">退出</button>
+      </div>
+
+      <div id="pending-panel">
+        <div id="pending-list" class="qa-list"></div>
+      </div>
+      <div id="answered-panel" style="display:none;">
+        <div id="answered-list" class="qa-list"></div>
+      </div>
+    </div>
+  </div>
+</Base>
+
+<script>
+  const API = 'https://ask.starryfield.space';
+  let token = sessionStorage.getItem('ask-admin-token') || '';
+
+  function authHeader() {
+    return { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` };
+  }
+
+  // 如果已有 token，直接进入面板
+  if (token) showPanel();
+
+  document.getElementById('admin-pwd')?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') document.getElementById('login-btn')?.click();
+  });
+
+  document.getElementById('login-btn')?.addEventListener('click', async () => {
+    const pwd = (document.getElementById('admin-pwd') as HTMLInputElement)?.value;
+    if (!pwd) return;
+    token = pwd;
+    const res = await fetch(`${API}/admin/pending`, { headers: authHeader() });
+    if (res.ok) {
+      sessionStorage.setItem('ask-admin-token', token);
+      showPanel();
+    } else {
+      const fb = document.getElementById('login-feedback');
+      if (fb) { fb.textContent = '密码错误'; fb.style.color = '#ff6b6b'; }
+    }
+  });
+
+  async function showPanel() {
+    const loginWrap = document.getElementById('login-wrap');
+    const panel = document.getElementById('admin-panel');
+    if (loginWrap) loginWrap.style.display = 'none';
+    if (panel) panel.style.display = 'block';
+    await loadPending();
+  }
+
+  async function loadPending() {
+    const list = document.getElementById('pending-list');
+    if (!list) return;
+    const res = await fetch(`${API}/admin/pending`, { headers: authHeader() });
+    const data = await res.json() as Array<{ id: number; name: string; question: string; created_at: string }>;
+    if (!data.length) { list.innerHTML = '<div class="qa-empty">暂无待回答的问题 ✓</div>'; return; }
+    list.innerHTML = data.map(q => `
+      <div class="admin-item" id="item-${q.id}">
+        <div class="qa-meta"><span class="qa-name-badge">${escHtml(q.name)}</span><span class="qa-date-sm">${q.created_at.slice(0,10)}</span></div>
+        <p class="qa-text-lg">${escHtml(q.question)}</p>
+        <textarea class="form-input form-textarea" id="reply-${q.id}" placeholder="写下你的回答…" rows="3"></textarea>
+        <div style="display:flex;gap:10px;margin-top:10px;">
+          <button class="admin-btn primary" onclick="reply(${q.id})">回复</button>
+          <button class="admin-btn danger" onclick="deleteQ(${q.id})">删除</button>
+        </div>
+        <div class="reply-feedback" id="fb-${q.id}"></div>
+      </div>
+    `).join('');
+  }
+
+  async function loadAnswered() {
+    const list = document.getElementById('answered-list');
+    if (!list) return;
+    list.innerHTML = '<div class="qa-empty">加载中…</div>';
+    const res = await fetch(`${API}/questions`);
+    const data = await res.json() as Array<{ id: number; name: string; question: string; answer: string; answered_at: string }>;
+    if (!data.length) { list.innerHTML = '<div class="qa-empty">还没有已回答的问题</div>'; return; }
+    list.innerHTML = data.map(q => `
+      <div class="admin-item">
+        <div class="qa-meta"><span class="qa-name-badge">${escHtml(q.name)}</span><span class="qa-date-sm">${q.answered_at.slice(0,10)}</span></div>
+        <p class="qa-text-lg"><strong>Q:</strong> ${escHtml(q.question)}</p>
+        <p class="qa-text-lg" style="color:var(--cyan)"><strong>A:</strong> ${escHtml(q.answer)}</p>
+        <button class="admin-btn danger" onclick="deleteQ(${q.id})" style="margin-top:8px;">删除</button>
+      </div>
+    `).join('');
+  }
+
+  async function reply(id: number) {
+    const answer = (document.getElementById(`reply-${id}`) as HTMLTextAreaElement)?.value.trim();
+    const fb = document.getElementById(`fb-${id}`);
+    if (!answer) { if (fb) { fb.textContent = '回答不能为空'; fb.style.color = '#ff6b6b'; } return; }
+    const res = await fetch(`${API}/admin/reply`, {
+      method: 'POST', headers: authHeader(),
+      body: JSON.stringify({ id, answer }),
+    });
+    if (res.ok) {
+      document.getElementById(`item-${id}`)?.remove();
+      const list = document.getElementById('pending-list');
+      if (list && !list.children.length) list.innerHTML = '<div class="qa-empty">暂无待回答的问题 ✓</div>';
+    } else {
+      if (fb) { fb.textContent = '发送失败'; fb.style.color = '#ff6b6b'; }
+    }
+  }
+
+  async function deleteQ(id: number) {
+    if (!confirm('确定删除这条问题吗？')) return;
+    await fetch(`${API}/admin/question/${id}`, { method: 'DELETE', headers: authHeader() });
+    document.getElementById(`item-${id}`)?.remove();
+  }
+
+  function switchTab(tab: string) {
+    document.getElementById('pending-panel')!.style.display = tab === 'pending' ? 'block' : 'none';
+    document.getElementById('answered-panel')!.style.display = tab === 'answered' ? 'block' : 'none';
+    document.getElementById('tab-pending')!.classList.toggle('active', tab === 'pending');
+    document.getElementById('tab-answered')!.classList.toggle('active', tab === 'answered');
+    if (tab === 'answered') loadAnswered();
+  }
+
+  function logout() {
+    sessionStorage.removeItem('ask-admin-token');
+    location.reload();
+  }
+
+  function escHtml(str: string) {
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  (window as any).reply = reply;
+  (window as any).deleteQ = deleteQ;
+  (window as any).switchTab = switchTab;
+  (window as any).logout = logout;
+</script>
+
+<style>
+  .admin-page { max-width: 700px; margin: 0 auto; padding: 20px 0 60px; }
+  .admin-login { display: flex; flex-direction: column; gap: 12px; max-width: 360px; }
+  .form-label { font-family: var(--pixel-font); font-size: 11px; color: var(--text-dim); }
+  .form-input {
+    background: var(--bg-dark); border: 1px solid rgba(0,255,245,0.15);
+    border-radius: 2px; padding: 10px 12px; font-family: var(--mono-font);
+    font-size: 14px; color: var(--text); box-sizing: border-box;
+  }
+  .form-input:focus { outline: none; border-color: var(--cyan); }
+  .form-textarea { width: 100%; resize: vertical; min-height: 80px; margin-top: 10px; }
+  .admin-btn {
+    font-family: var(--pixel-font); font-size: 11px; padding: 8px 16px;
+    border: 1px solid rgba(0,255,245,0.3); background: transparent;
+    color: var(--text); border-radius: 2px; cursor: pointer; transition: all 0.2s;
+  }
+  .admin-btn:hover { border-color: var(--cyan); color: var(--cyan); }
+  .admin-btn.primary { background: var(--cyan); color: var(--bg-dark); border-color: var(--cyan); }
+  .admin-btn.danger { border-color: rgba(255,107,107,0.4); color: #ff6b6b; }
+  .admin-btn.danger:hover { background: rgba(255,107,107,0.1); }
+  .tab-btn {
+    font-family: var(--pixel-font); font-size: 11px; padding: 8px 16px;
+    border: 1px solid rgba(0,255,245,0.2); background: transparent;
+    color: var(--text-dim); border-radius: 2px; cursor: pointer;
+  }
+  .tab-btn.active { border-color: var(--cyan); color: var(--cyan); background: rgba(0,255,245,0.05); }
+  .qa-list { display: flex; flex-direction: column; gap: 16px; }
+  .qa-empty { color: var(--text-dim); font-size: 14px; text-align: center; padding: 40px 0; }
+  .admin-item { background: var(--bg-card); border: 1px solid rgba(0,255,245,0.08); border-radius: 2px; padding: 20px; }
+  .qa-meta { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+  .qa-name-badge { font-family: var(--pixel-font); font-size: 11px; color: var(--cyan); background: rgba(0,255,245,0.1); padding: 2px 8px; border-radius: 2px; }
+  .qa-date-sm { font-size: 12px; color: var(--text-dim); font-family: var(--mono-font); }
+  .qa-text-lg { font-size: 14px; color: var(--text); line-height: 1.7; margin: 0 0 8px; }
+  .reply-feedback { margin-top: 8px; font-size: 13px; }
+  .admin-feedback { font-size: 13px; margin-top: 4px; }
+</style>

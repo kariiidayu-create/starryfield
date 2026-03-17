@@ -1,0 +1,219 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base title="Ask Me" description="有什么想问我的？留下你的问题，我会认真回答。">
+  <div class="ask-page">
+
+    <div class="ask-hero">
+      <h1 class="section-title" style="font-size: 22px;">
+        <svg viewBox="0 0 16 16" width="20" height="20" fill="none" style="display:inline-block;vertical-align:-0.2em;margin-right:8px;"><circle cx="8" cy="8" r="6" stroke="var(--cyan)" stroke-width="1.5"/><text x="8" y="12" text-anchor="middle" font-size="9" font-family="monospace" fill="var(--cyan)">?</text></svg>
+        ASK ME
+      </h1>
+      <p class="ask-desc">有什么想问我的？可以是任何事——生活、游戏、Web3、或者只是好奇心。我会认真回答。</p>
+    </div>
+
+    <!-- 提问表单 -->
+    <div class="ask-form-wrap">
+      <form class="ask-form" id="ask-form">
+        <div class="form-row">
+          <label class="form-label">// YOUR NAME</label>
+          <input class="form-input" id="ask-name" type="text" placeholder="匿名也可以" maxlength="30" />
+        </div>
+        <div class="form-row">
+          <label class="form-label">// YOUR QUESTION</label>
+          <textarea class="form-input form-textarea" id="ask-question" placeholder="写下你的问题…" maxlength="300" rows="3"></textarea>
+          <div class="char-count"><span id="char-count">0</span> / 300</div>
+        </div>
+        <button type="submit" class="ask-submit" id="ask-submit">
+          <svg viewBox="0 0 16 16" width="14" height="14" fill="none" style="display:inline-block;vertical-align:-0.1em;margin-right:6px;"><path d="M1 8l13-6-5 6 5 6-13-6z" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>
+          发送提问
+        </button>
+        <div class="ask-feedback" id="ask-feedback"></div>
+      </form>
+    </div>
+
+    <!-- 已回答的问题 -->
+    <div class="qa-section">
+      <h2 class="section-title" style="font-size: 14px; margin-bottom: 24px;">
+        // ANSWERED
+      </h2>
+      <div id="qa-list" class="qa-list">
+        <div class="qa-loading">加载中…</div>
+      </div>
+    </div>
+
+  </div>
+</Base>
+
+<script>
+  const API = 'https://ask.starryfield.space';
+
+  // 字数统计
+  const textarea = document.getElementById('ask-question') as HTMLTextAreaElement;
+  const charCount = document.getElementById('char-count');
+  textarea?.addEventListener('input', () => {
+    if (charCount) charCount.textContent = String(textarea.value.length);
+  });
+
+  // 提交表单
+  document.getElementById('ask-form')?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = (document.getElementById('ask-name') as HTMLInputElement)?.value.trim();
+    const question = textarea?.value.trim();
+    const feedback = document.getElementById('ask-feedback');
+    const btn = document.getElementById('ask-submit') as HTMLButtonElement;
+
+    if (!question) {
+      if (feedback) { feedback.textContent = '问题不能为空'; feedback.className = 'ask-feedback error'; }
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = '发送中…';
+
+    try {
+      const res = await fetch(`${API}/question`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: name || '匿名', question }),
+      });
+      if (res.ok) {
+        if (feedback) { feedback.textContent = '✓ 已收到！我会尽快回答你的问题。'; feedback.className = 'ask-feedback success'; }
+        (document.getElementById('ask-name') as HTMLInputElement).value = '';
+        textarea.value = '';
+        if (charCount) charCount.textContent = '0';
+      } else {
+        throw new Error();
+      }
+    } catch {
+      if (feedback) { feedback.textContent = '发送失败，请稍后再试'; feedback.className = 'ask-feedback error'; }
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<svg viewBox="0 0 16 16" width="14" height="14" fill="none" style="display:inline-block;vertical-align:-0.1em;margin-right:6px;"><path d="M1 8l13-6-5 6 5 6-13-6z" stroke="currentColor" stroke-width="1.5" fill="none"/></svg>发送提问';
+    }
+  });
+
+  // 加载已回答问题
+  async function loadQA() {
+    const list = document.getElementById('qa-list');
+    if (!list) return;
+    try {
+      const res = await fetch(`${API}/questions`);
+      const data = await res.json() as Array<{ id: number; name: string; question: string; answer: string; answered_at: string }>;
+      if (!data.length) {
+        list.innerHTML = '<div class="qa-empty">还没有回答的问题，快来提第一个吧！</div>';
+        return;
+      }
+      list.innerHTML = data.map(q => `
+        <div class="qa-item">
+          <div class="qa-q">
+            <span class="qa-badge q-badge">Q</span>
+            <div class="qa-content">
+              <span class="qa-name">${escHtml(q.name)}</span>
+              <p class="qa-text">${escHtml(q.question)}</p>
+            </div>
+          </div>
+          <div class="qa-a">
+            <span class="qa-badge a-badge">A</span>
+            <div class="qa-content">
+              <span class="qa-name">星见眠</span>
+              <p class="qa-text">${escHtml(q.answer).replace(/\n/g, '<br>')}</p>
+            </div>
+          </div>
+          <div class="qa-date">${q.answered_at.slice(0, 10)}</div>
+        </div>
+      `).join('');
+    } catch {
+      if (list) list.innerHTML = '<div class="qa-empty">加载失败，请刷新重试</div>';
+    }
+  }
+
+  function escHtml(str: string) {
+    return str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  }
+
+  loadQA();
+</script>
+
+<style>
+  .ask-page { max-width: 700px; margin: 0 auto; padding: 20px 0 60px; }
+  .ask-hero { margin-bottom: 40px; }
+  .ask-desc { font-size: 14px; color: var(--text-dim); margin-top: 12px; line-height: 1.7; }
+
+  /* 表单 */
+  .ask-form-wrap {
+    background: var(--bg-card);
+    border: 1px solid rgba(0, 255, 245, 0.15);
+    border-radius: 2px;
+    padding: 24px;
+    margin-bottom: 48px;
+  }
+  .form-row { margin-bottom: 16px; }
+  .form-label { display: block; font-family: var(--pixel-font); font-size: 11px; color: var(--text-dim); margin-bottom: 8px; }
+  .form-input {
+    width: 100%;
+    background: var(--bg-dark);
+    border: 1px solid rgba(0, 255, 245, 0.15);
+    border-radius: 2px;
+    padding: 10px 12px;
+    font-family: var(--mono-font);
+    font-size: 14px;
+    color: var(--text);
+    box-sizing: border-box;
+    transition: border-color 0.2s;
+  }
+  .form-input::placeholder {
+    color: rgba(255, 255, 255, 0.3);
+  }
+  .form-input:focus { outline: none; border-color: var(--cyan); box-shadow: 0 0 8px rgba(0,255,245,0.1); }
+  .form-textarea { resize: vertical; min-height: 80px; }
+  .char-count { text-align: right; font-size: 12px; color: var(--text-dim); margin-top: 4px; }
+  .ask-submit {
+    font-family: var(--pixel-font);
+    font-size: 12px;
+    color: #000;
+    background: var(--cyan);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .ask-submit:hover { box-shadow: 0 0 12px rgba(0,255,245,0.4); }
+  .ask-submit:disabled { opacity: 0.5; cursor: not-allowed; }
+  .ask-feedback { margin-top: 12px; font-size: 13px; font-family: var(--mono-font); }
+  .ask-feedback.success { color: var(--cyan); }
+  .ask-feedback.error { color: #ff6b6b; }
+
+  /* QA 列表 */
+  .qa-list { display: flex; flex-direction: column; gap: 20px; }
+  .qa-loading, .qa-empty { color: var(--text-dim); font-size: 14px; text-align: center; padding: 40px 0; }
+  .qa-item {
+    background: var(--bg-card);
+    border: 1px solid rgba(0, 255, 245, 0.08);
+    border-radius: 2px;
+    padding: 20px;
+    position: relative;
+  }
+  .qa-q, .qa-a { display: flex; gap: 12px; align-items: flex-start; }
+  .qa-a { margin-top: 16px; padding-top: 16px; border-top: 1px dashed rgba(0,255,245,0.1); }
+  .qa-badge {
+    font-family: var(--pixel-font);
+    font-size: 11px;
+    padding: 3px 7px;
+    border-radius: 2px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .q-badge { background: rgba(0,255,245,0.1); color: var(--cyan); }
+  .a-badge { background: rgba(255,0,255,0.1); color: var(--magenta); }
+  .qa-content { flex: 1; }
+  .qa-name { font-family: var(--pixel-font); font-size: 11px; color: var(--text-dim); display: block; margin-bottom: 6px; }
+  .qa-text { font-size: 14px; color: var(--text); line-height: 1.7; margin: 0; }
+  .qa-date { position: absolute; top: 16px; right: 16px; font-size: 12px; color: var(--text-dim); font-family: var(--mono-font); }
+
+  @media (max-width: 640px) {
+    .qa-date { position: static; margin-top: 12px; }
+  }
+</style>

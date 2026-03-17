@@ -1,0 +1,117 @@
+---
+interface Props {
+  title: string;
+}
+const { title } = Astro.props;
+---
+
+<div class="share-bar">
+  <span class="share-label">// SHARE</span>
+  <button class="share-btn" id="share-copy" title="复制链接">
+    <svg viewBox="0 0 16 16" width="14" height="14" fill="none">
+      <rect x="5" y="1" width="8" height="10" rx="1" stroke="currentColor" stroke-width="1.5"/>
+      <rect x="2" y="4" width="8" height="10" rx="1" fill="var(--bg-card)" stroke="currentColor" stroke-width="1.5"/>
+    </svg>
+    复制链接
+  </button>
+  <a class="share-btn" id="share-twitter" target="_blank" rel="noopener" title="分享到 X">
+    <svg viewBox="0 0 16 16" width="14" height="14" fill="currentColor">
+      <path d="M12.6 1h2.4l-5.2 6 6.1 8h-4.8l-3.7-4.9-4.3 4.9H.7l5.6-6.4L.3 1h4.9l3.4 4.4L12.6 1zm-.8 12.6h1.3L4.3 2.4H2.9l8.9 11.2z"/>
+    </svg>
+    X
+  </a>
+  <button class="share-btn" id="share-native" title="更多分享方式" style="display:none;">
+    <svg viewBox="0 0 16 16" width="14" height="14" fill="none">
+      <circle cx="13" cy="3" r="2" stroke="currentColor" stroke-width="1.5"/>
+      <circle cx="3" cy="8" r="2" stroke="currentColor" stroke-width="1.5"/>
+      <circle cx="13" cy="13" r="2" stroke="currentColor" stroke-width="1.5"/>
+      <line x1="5" y1="7" x2="11" y2="4" stroke="currentColor" stroke-width="1.5"/>
+      <line x1="5" y1="9" x2="11" y2="12" stroke="currentColor" stroke-width="1.5"/>
+    </svg>
+    分享
+  </button>
+  <span class="share-toast" id="share-toast">已复制！</span>
+</div>
+
+<script define:vars={{ title }}>
+  const url = window.location.href;
+
+  // 复制链接
+  document.getElementById('share-copy')?.addEventListener('click', async () => {
+    await navigator.clipboard.writeText(url);
+    const toast = document.getElementById('share-toast');
+    if (toast) {
+      toast.classList.add('show');
+      setTimeout(() => toast.classList.remove('show'), 2000);
+    }
+  });
+
+  // X / Twitter
+  const twitterBtn = document.getElementById('share-twitter');
+  if (twitterBtn) {
+    twitterBtn.setAttribute('href', `https://twitter.com/intent/tweet?text=${encodeURIComponent(title)}&url=${encodeURIComponent(url)}`);
+  }
+
+  // 原生分享（移动端）
+  const nativeBtn = document.getElementById('share-native');
+  if (nativeBtn && navigator.share) {
+    nativeBtn.style.display = 'inline-flex';
+    nativeBtn.addEventListener('click', () => {
+      navigator.share({ title, url });
+    });
+  }
+</script>
+
+<style>
+  .share-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 40px;
+    padding: 16px;
+    background: var(--bg-card);
+    border: 1px dashed rgba(0, 255, 245, 0.2);
+    border-radius: 2px;
+    flex-wrap: wrap;
+    position: relative;
+  }
+  .share-label {
+    font-family: var(--pixel-font);
+    font-size: 11px;
+    color: var(--text-dim);
+    margin-right: 4px;
+  }
+  .share-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    font-family: var(--pixel-font);
+    font-size: 11px;
+    color: var(--text-dim);
+    background: transparent;
+    border: 1px solid rgba(0, 255, 245, 0.2);
+    border-radius: 2px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s;
+  }
+  .share-btn:hover {
+    color: var(--cyan);
+    border-color: var(--cyan);
+    box-shadow: 0 0 8px rgba(0, 255, 245, 0.2);
+  }
+  .share-toast {
+    position: absolute;
+    right: 16px;
+    font-family: var(--pixel-font);
+    font-size: 11px;
+    color: var(--cyan);
+    opacity: 0;
+    transition: opacity 0.2s;
+    pointer-events: none;
+  }
+  .share-toast.show {
+    opacity: 1;
+  }
+</style>
