@@ -5,10 +5,12 @@ import PixelPet from '../components/PixelPet.astro';
 interface Props {
   title?: string;
   description?: string;
+  ogImage?: string;
 }
 
-const { title = 'STARRYFIELD', description = '星原 — 游戏收藏与世界探索' } = Astro.props;
+const { title = 'STARRYFIELD', description = '星原 — 游戏收藏与世界探索', ogImage = '/og-default.png' } = Astro.props;
 const pageTitle = title === 'STARRYFIELD' ? title : `${title} | STARRYFIELD`;
+const canonicalUrl = new URL(Astro.url.pathname, 'https://starryfield.space').href;
 ---
 
 <!doctype html>
@@ -18,8 +20,20 @@ const pageTitle = title === 'STARRYFIELD' ? title : `${title} | STARRYFIELD`;
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="description" content={description} />
     <title>{pageTitle}</title>
+    <link rel="canonical" href={canonicalUrl} />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="alternate" type="application/rss+xml" title="STARRYFIELD" href="/feed.xml" />
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={`https://starryfield.space${ogImage}`} />
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={`https://starryfield.space${ogImage}`} />
     <script is:inline>
       (function() {
         const t = localStorage.getItem('sf-theme');

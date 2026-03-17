@@ -1,13 +1,9 @@
 ---
 import Base from '../layouts/Base.astro';
-import { getCollection } from 'astro:content';
 import PixelIcon from '../components/PixelIcon.astro';
+import { getAllCounts } from '../utils/collections';
 
-const gamesCount = (await getCollection('games')).length;
-const explorationsCount = (await getCollection('explorations')).length;
-const craftsCount = (await getCollection('crafts')).length;
-const drawingsCount = (await getCollection('drawings')).length;
-const cookingCount = (await getCollection('cooking')).length;
+const { games: gamesCount, explorations: explorationsCount, crafts: craftsCount, drawings: drawingsCount, cooking: cookingCount } = await getAllCounts();
 
 const launchDate = new Date('2026-03-13');
 const now = new Date();

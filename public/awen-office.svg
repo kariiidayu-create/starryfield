@@ -1,0 +1,220 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" shape-rendering="crispEdges">
+  <!-- ===== 地板 ===== -->
+  <rect width="192" height="192" fill="#1a1a2e"/>
+  <!-- 木地板格子 -->
+  <g fill="#2a1f14">
+    <rect x="16" y="32" width="160" height="144"/>
+  </g>
+  <g fill="#33261a">
+    <rect x="16" y="32" width="32" height="16"/><rect x="80" y="32" width="32" height="16"/><rect x="144" y="32" width="32" height="16"/>
+    <rect x="48" y="48" width="32" height="16"/><rect x="112" y="48" width="32" height="16"/>
+    <rect x="16" y="64" width="32" height="16"/><rect x="80" y="64" width="32" height="16"/><rect x="144" y="64" width="32" height="16"/>
+    <rect x="48" y="80" width="32" height="16"/><rect x="112" y="80" width="32" height="16"/>
+    <rect x="16" y="96" width="32" height="16"/><rect x="80" y="96" width="32" height="16"/><rect x="144" y="96" width="32" height="16"/>
+    <rect x="48" y="112" width="32" height="16"/><rect x="112" y="112" width="32" height="16"/>
+    <rect x="16" y="128" width="32" height="16"/><rect x="80" y="128" width="32" height="16"/><rect x="144" y="128" width="32" height="16"/>
+    <rect x="48" y="144" width="32" height="16"/><rect x="112" y="144" width="32" height="16"/>
+    <rect x="16" y="160" width="32" height="16"/><rect x="80" y="160" width="32" height="16"/><rect x="144" y="160" width="32" height="16"/>
+  </g>
+
+  <!-- ===== 墙壁 ===== -->
+  <rect x="0" y="0" width="192" height="32" fill="#16213e"/>
+  <rect x="0" y="28" width="192" height="4" fill="#0f3460"/>
+  <!-- 左墙 -->
+  <rect x="0" y="0" width="16" height="192" fill="#16213e"/>
+  <rect x="12" y="0" width="4" height="192" fill="#0f3460"/>
+  <!-- 右墙 -->
+  <rect x="176" y="0" width="16" height="192" fill="#16213e"/>
+  <rect x="176" y="0" width="4" height="192" fill="#0f3460"/>
+
+  <!-- ===== 窗户（顶墙中央）===== -->
+  <rect x="72" y="4" width="48" height="24" fill="#0a0a23" rx="1"/>
+  <rect x="74" y="6" width="20" height="20" fill="#0c1445"/>
+  <rect x="98" y="6" width="20" height="20" fill="#0c1445"/>
+  <!-- 窗外星星（闪烁） -->
+  <rect x="80" y="9" width="2" height="2" fill="#ffd700">
+    <animate attributeName="opacity" values="1;0.3;1" dur="2s" repeatCount="indefinite"/>
+  </rect>
+  <rect x="88" y="14" width="2" height="2" fill="#fff">
+    <animate attributeName="opacity" values="1;0.2;1" dur="3s" repeatCount="indefinite"/>
+  </rect>
+  <rect x="76" y="18" width="2" height="2" fill="#b0c4ff">
+    <animate attributeName="opacity" values="0.5;1;0.5" dur="2.5s" repeatCount="indefinite"/>
+  </rect>
+  <rect x="104" y="10" width="2" height="2" fill="#ffd700">
+    <animate attributeName="opacity" values="1;0.4;1" dur="1.8s" repeatCount="indefinite"/>
+  </rect>
+  <rect x="110" y="16" width="2" height="2" fill="#fff">
+    <animate attributeName="opacity" values="0.6;1;0.6" dur="2.2s" repeatCount="indefinite"/>
+  </rect>
+  <rect x="100" y="20" width="2" height="2" fill="#b0c4ff">
+    <animate attributeName="opacity" values="1;0.3;1" dur="3.5s" repeatCount="indefinite"/>
+  </rect>
+  <!-- 窗框 -->
+  <rect x="72" y="4" width="48" height="2" fill="#4a4a6a"/>
+  <rect x="72" y="26" width="48" height="2" fill="#4a4a6a"/>
+  <rect x="94" y="4" width="4" height="24" fill="#4a4a6a"/>
+
+  <!-- ===== 书架（左侧）===== -->
+  <rect x="20" y="34" width="32" height="48" fill="#5c3a1e"/>
+  <rect x="20" y="34" width="32" height="2" fill="#7a5230"/>
+  <rect x="20" y="50" width="32" height="2" fill="#7a5230"/>
+  <rect x="20" y="66" width="32" height="2" fill="#7a5230"/>
+  <!-- 书本 -->
+  <rect x="22" y="36" width="4" height="14" fill="#e74c3c"/>
+  <rect x="27" y="38" width="4" height="12" fill="#3498db"/>
+  <rect x="32" y="36" width="4" height="14" fill="#2ecc71"/>
+  <rect x="37" y="37" width="4" height="13" fill="#f39c12"/>
+  <rect x="42" y="36" width="6" height="14" fill="#9b59b6"/>
+  <rect x="22" y="52" width="6" height="14" fill="#1abc9c"/>
+  <rect x="29" y="53" width="4" height="13" fill="#e67e22"/>
+  <rect x="34" y="52" width="4" height="14" fill="#e74c3c"/>
+  <rect x="39" y="54" width="5" height="12" fill="#3498db"/>
+  <rect x="45" y="52" width="4" height="14" fill="#f1c40f"/>
+  <!-- 书架顶上的小海豹摆件 -->
+  <rect x="24" y="68" width="10" height="6" fill="#c0c8d4"/>
+  <rect x="26" y="72" width="8" height="4" fill="#c0c8d4"/>
+  <rect x="26" y="68" width="2" height="2" fill="#1a1a2e"/>
+  <rect x="30" y="68" width="2" height="2" fill="#1a1a2e"/>
+  <rect x="28" y="70" width="2" height="1" fill="#1a1a2e"/>
+
+  <!-- ===== 办公桌（中央偏右）===== -->
+  <rect x="72" y="72" width="64" height="32" fill="#4a3728"/>
+  <rect x="72" y="72" width="64" height="3" fill="#5c4633"/>
+  <rect x="72" y="100" width="4" height="16" fill="#3d2b1c"/>
+  <rect x="132" y="100" width="4" height="16" fill="#3d2b1c"/>
+
+  <!-- ===== 显示器 ===== -->
+  <rect x="88" y="58" width="32" height="22" fill="#2c2c3a"/>
+  <rect x="90" y="60" width="28" height="16" fill="#1a1a2e"/>
+  <!-- 屏幕内容（代码，滚动效果） -->
+  <g>
+    <animateTransform attributeName="transform" type="translate" values="0,0;0,-2;0,0" dur="8s" repeatCount="indefinite"/>
+    <rect x="92" y="62" width="12" height="2" fill="#00ff88"/>
+    <rect x="92" y="66" width="8" height="2" fill="#00fff5"/>
+    <rect x="102" y="66" width="6" height="2" fill="#ffd700"/>
+    <rect x="92" y="70" width="16" height="2" fill="#ff79c6"/>
+    <rect x="96" y="74" width="10" height="2" fill="#00fff5"/>
+  </g>
+  <!-- 光标闪烁 -->
+  <rect x="106" y="74" width="2" height="2" fill="#fff">
+    <animate attributeName="opacity" values="1;0;1" dur="1s" repeatCount="indefinite"/>
+  </rect>
+  <!-- 显示器支架 -->
+  <rect x="100" y="80" width="8" height="4" fill="#2c2c3a"/>
+  <rect x="96" y="82" width="16" height="3" fill="#2c2c3a"/>
+  <!-- 屏幕发光效果 -->
+  <rect x="90" y="60" width="28" height="1" fill="#00fff5" opacity="0.15"/>
+
+  <!-- ===== 键盘 ===== -->
+  <rect x="92" y="88" width="20" height="8" fill="#3a3a4a"/>
+  <rect x="94" y="90" width="2" height="1" fill="#5a5a6a"/>
+  <rect x="97" y="90" width="2" height="1" fill="#5a5a6a"/>
+  <rect x="100" y="90" width="2" height="1" fill="#5a5a6a"/>
+  <rect x="103" y="90" width="2" height="1" fill="#5a5a6a"/>
+  <rect x="106" y="90" width="2" height="1" fill="#5a5a6a"/>
+  <rect x="94" y="92" width="2" height="1" fill="#5a5a6a"/>
+  <rect x="97" y="92" width="2" height="1" fill="#5a5a6a"/>
+  <rect x="100" y="92" width="2" height="1" fill="#5a5a6a"/>
+  <rect x="103" y="92" width="2" height="1" fill="#5a5a6a"/>
+  <rect x="106" y="92" width="2" height="1" fill="#5a5a6a"/>
+  <rect x="96" y="94" width="12" height="1" fill="#5a5a6a"/>
+
+  <!-- ===== 咖啡杯 ===== -->
+  <rect x="128" y="84" width="6" height="8" fill="#8B4513"/>
+  <rect x="134" y="86" width="2" height="4" fill="#8B4513"/>
+  <rect x="129" y="84" width="4" height="2" fill="#6b3410"/>
+  <!-- 热气（飘动） -->
+  <rect x="130" y="80" width="2" height="2" fill="#fff">
+    <animate attributeName="opacity" values="0.4;0.1;0.4" dur="2s" repeatCount="indefinite"/>
+    <animate attributeName="y" values="80;76;80" dur="2s" repeatCount="indefinite"/>
+  </rect>
+  <rect x="132" y="78" width="2" height="2" fill="#fff">
+    <animate attributeName="opacity" values="0.2;0.05;0.2" dur="2.5s" repeatCount="indefinite"/>
+    <animate attributeName="y" values="78;73;78" dur="2.5s" repeatCount="indefinite"/>
+  </rect>
+  <rect x="129" y="76" width="2" height="2" fill="#fff">
+    <animate attributeName="opacity" values="0.15;0;0.15" dur="3s" repeatCount="indefinite"/>
+    <animate attributeName="y" values="76;71;76" dur="3s" repeatCount="indefinite"/>
+  </rect>
+
+  <!-- ===== 阿文（像素小人，坐在椅子上）===== -->
+  <!-- 椅子 -->
+  <rect x="92" y="108" width="20" height="4" fill="#4a2c6a"/>
+  <rect x="90" y="100" width="4" height="16" fill="#4a2c6a"/>
+  <rect x="110" y="112" width="4" height="8" fill="#3d2156"/>
+  <rect x="90" y="112" width="4" height="8" fill="#3d2156"/>
+  <!-- 身体（深色外套，呼吸起伏） -->
+  <g>
+    <animateTransform attributeName="transform" type="translate" values="0,0;0,-1;0,0" dur="3s" repeatCount="indefinite"/>
+    <rect x="96" y="100" width="12" height="12" fill="#1e1e3a"/>
+    <!-- 左手（打字动画） -->
+    <rect x="94" y="102" width="4" height="8" fill="#1e1e3a">
+      <animateTransform attributeName="transform" type="translate" values="0,0;0,-1;0,0;0,-1;0,0" dur="0.6s" repeatCount="indefinite"/>
+    </rect>
+    <!-- 右手（打字动画，错开节奏） -->
+    <rect x="106" y="102" width="4" height="8" fill="#1e1e3a">
+      <animateTransform attributeName="transform" type="translate" values="0,0;0,-1;0,0" dur="0.4s" repeatCount="indefinite"/>
+    </rect>
+    <!-- 头 -->
+    <rect x="98" y="90" width="8" height="10" fill="#f5d6b8"/>
+    <!-- 头发（黑色，有点乱） -->
+    <rect x="96" y="88" width="12" height="4" fill="#1a1a2e"/>
+    <rect x="96" y="92" width="2" height="2" fill="#1a1a2e"/>
+    <rect x="106" y="92" width="2" height="3" fill="#1a1a2e"/>
+    <!-- 眼睛（会眨眼） -->
+    <rect x="100" y="94" width="2" height="2" fill="#1a1a2e"/>
+    <rect x="104" y="94" width="2" height="2" fill="#1a1a2e"/>
+    <rect x="104" y="94" width="1" height="1" fill="#fff"/>
+    <rect x="100" y="94" width="1" height="1" fill="#fff"/>
+    <!-- 眨眼（肤色遮盖眼睛） -->
+    <rect x="99" y="94" width="8" height="2" fill="#f5d6b8" opacity="0">
+      <animate attributeName="opacity" values="0;0;0;0;0;0;0;0;0;1;0;0;0;0;0;0;0;0;0;0" dur="4s" repeatCount="indefinite"/>
+    </rect>
+    <!-- 嘴（微笑） -->
+    <rect x="101" y="97" width="4" height="1" fill="#c9967a"/>
+  </g>
+
+  <!-- ===== 盆栽（右下角）===== -->
+  <rect x="152" y="152" width="16" height="12" fill="#8B4513"/>
+  <rect x="154" y="150" width="12" height="4" fill="#8B4513"/>
+  <!-- 土壤 -->
+  <rect x="154" y="150" width="12" height="2" fill="#3d2b1c"/>
+  <!-- 植物 -->
+  <rect x="158" y="140" width="4" height="12" fill="#2d6b3f"/>
+  <rect x="154" y="136" width="6" height="6" fill="#3cb371"/>
+  <rect x="160" y="134" width="6" height="6" fill="#2ecc71"/>
+  <rect x="156" y="130" width="4" height="6" fill="#27ae60"/>
+  <rect x="162" y="138" width="4" height="4" fill="#3cb371"/>
+
+  <!-- ===== 地毯（椅子下方）===== -->
+  <rect x="84" y="120" width="36" height="20" fill="#4a1942" opacity="0.6"/>
+  <rect x="86" y="122" width="32" height="16" fill="#6b2158" opacity="0.4"/>
+  <rect x="96" y="126" width="12" height="8" fill="#8b3a6a" opacity="0.3"/>
+
+  <!-- ===== 台灯（桌子左侧）===== -->
+  <rect x="76" y="82" width="2" height="10" fill="#c0c0c0"/>
+  <rect x="74" y="80" width="6" height="4" fill="#ffd700"/>
+  <rect x="74" y="78" width="6" height="2" fill="#ffec80"/>
+  <!-- 灯光效果（微微闪动） -->
+  <rect x="72" y="84" width="10" height="6" fill="#ffd700">
+    <animate attributeName="opacity" values="0.08;0.12;0.08" dur="5s" repeatCount="indefinite"/>
+  </rect>
+
+  <!-- ===== 墙上装饰 ===== -->
+  <!-- 小画框 -->
+  <rect x="140" y="36" width="24" height="18" fill="#5c4633"/>
+  <rect x="142" y="38" width="20" height="14" fill="#0c1445"/>
+  <!-- 画里的山和星星 -->
+  <rect x="142" y="46" width="8" height="6" fill="#2d4a3f"/>
+  <rect x="148" y="42" width="6" height="10" fill="#1a3a2e"/>
+  <rect x="156" y="44" width="6" height="8" fill="#2d4a3f"/>
+  <rect x="146" y="39" width="2" height="2" fill="#ffd700"/>
+  <rect x="156" y="40" width="2" height="2" fill="#fff"/>
+
+  <!-- ===== 环境光效果 ===== -->
+  <!-- 显示器光晕（呼吸感） -->
+  <rect x="84" y="56" width="40" height="36" fill="#00fff5">
+    <animate attributeName="opacity" values="0.03;0.06;0.03" dur="4s" repeatCount="indefinite"/>
+  </rect>
+</svg>

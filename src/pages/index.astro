@@ -1,22 +1,22 @@
 ---
 import Base from '../layouts/Base.astro';
 import PixelIcon from '../components/PixelIcon.astro';
-import { getCollection } from 'astro:content';
+import { getSortedGames, getSortedExplorations, getSortedCrafts, getSortedDrawings, getSortedCooking } from '../utils/collections';
 
-const allGames = await getCollection('games');
-const games = allGames.sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99)).slice(0, 3);
+const games = await getSortedGames(3);
+const allGames = await getSortedGames();
 
-const allPosts = await getCollection('explorations');
-const posts = allPosts.sort((a, b) => b.data.date.localeCompare(a.data.date)).slice(0, 3);
+const posts = await getSortedExplorations(3);
+const allPosts = await getSortedExplorations();
 
-const allCrafts = await getCollection('crafts');
-const crafts = allCrafts.sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99)).slice(0, 3);
+const crafts = await getSortedCrafts(3);
+const allCrafts = await getSortedCrafts();
 
-const allDrawings = await getCollection('drawings');
-const drawings = allDrawings.sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99)).slice(0, 3);
+const drawings = await getSortedDrawings(3);
+const allDrawings = await getSortedDrawings();
 
-const allCooking = await getCollection('cooking');
-const dishes = allCooking.sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99)).slice(0, 3);
+const dishes = await getSortedCooking(3);
+const allCooking = await getSortedCooking();
 
 // Recent activity: merge all content with icons and sort by date
 // Pixel icon SVGs for dynamic rendering
@@ -538,6 +538,19 @@ const stats = [
       border-radius: 2px;
       padding: 20px;
       overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(0, 255, 245, 0.3) transparent;
+    }
+    .heatmap-wrap::-webkit-scrollbar {
+      height: 4px;
+    }
+    .heatmap-wrap::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .heatmap-wrap::-webkit-scrollbar-thumb {
+      background: rgba(0, 255, 245, 0.3);
+      border-radius: 2px;
     }
     .heatmap-layout {
       display: flex;
@@ -655,8 +668,11 @@ const stats = [
       margin-top: 12px;
     }
     @media (max-width: 640px) {
-      .heatmap-layout { flex-direction: column; align-items: center; }
-      .heatmap-sidebar { flex-direction: row; gap: 16px; }
+      .heatmap-layout { flex-direction: column; align-items: stretch; }
+      .heatmap-sidebar { flex-direction: row; gap: 16px; justify-content: center; }
+      .heatmap-main { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+      .heatmap { min-width: max-content; }
+      .heatmap-months { min-width: max-content; }
       .heatmap-cell { width: 10px; height: 10px; }
     }
   </style>
