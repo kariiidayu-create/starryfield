@@ -6,19 +6,19 @@
   <div class="reactions-title">// REACTIONS</div>
   <div class="reactions-row">
     <button class="reaction-btn" data-type="fire">
-      <span class="reaction-label">[超赞]</span>
+      <span class="reaction-label"><span class="bracket">[</span><span class="reaction-text">超赞</span><span class="bracket">]</span></span>
       <span class="reaction-count" data-count="fire">0</span>
     </button>
     <button class="reaction-btn" data-type="useful">
-      <span class="reaction-label">[有用]</span>
+      <span class="reaction-label"><span class="bracket">[</span><span class="reaction-text">有用</span><span class="bracket">]</span></span>
       <span class="reaction-count" data-count="useful">0</span>
     </button>
     <button class="reaction-btn" data-type="love">
-      <span class="reaction-label">[喜欢]</span>
+      <span class="reaction-label"><span class="bracket">[</span><span class="reaction-text">喜欢</span><span class="bracket">]</span></span>
       <span class="reaction-count" data-count="love">0</span>
     </button>
     <button class="reaction-btn" data-type="fun">
-      <span class="reaction-label">[好玩]</span>
+      <span class="reaction-label"><span class="bracket">[</span><span class="reaction-text">好玩</span><span class="bracket">]</span></span>
       <span class="reaction-count" data-count="fun">0</span>
     </button>
   </div>
@@ -135,10 +135,33 @@
     color: var(--cyan);
   }
 
+  .reaction-label {
+    display: inline-flex;
+    align-items: center;
+    line-height: 1;
+  }
+
+  .bracket {
+    font-family: var(--pixel-font);
+    font-size: 12px;
+    display: inline-flex;
+    align-items: center;
+    height: 16px;
+  }
+
+  .reaction-text {
+    font-size: 12px;
+    display: inline-flex;
+    align-items: center;
+    height: 16px;
+    transform: translateY(-2px);
+  }
+
   .reaction-count {
     font-family: var(--mono-font);
     font-size: 11px;
     min-width: 12px;
     text-align: center;
+    line-height: 1;
   }
 </style>

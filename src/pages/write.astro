@@ -1,0 +1,330 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base title="写文章">
+<div class="write-page">
+
+  <!-- Token 设置 -->
+  <div id="token-screen" style="display:none;">
+    <div class="token-wrap">
+      <p class="token-label">// GITHUB TOKEN</p>
+      <p class="token-hint">在 GitHub → Settings → Developer settings → Personal access tokens 生成，勾选 repo 权限。只存在你的浏览器里。</p>
+      <input type="password" id="token-input" class="field-input" placeholder="ghp_..." />
+      <button class="pub-btn" id="token-save-btn">保存</button>
+    </div>
+  </div>
+
+  <!-- 编辑器 -->
+  <div id="editor-screen" style="display:none;">
+    <div class="editor-header">
+      <h1 class="editor-heading">// 新文章</h1>
+      <div class="editor-header-actions">
+        <button class="ghost-btn" id="settings-btn" title="设置Token">⚙</button>
+        <button class="pub-btn" id="publish-btn">发布</button>
+      </div>
+    </div>
+
+    <!-- 元数据 -->
+    <div class="meta-row">
+      <div class="meta-field">
+        <label class="field-label">标题</label>
+        <input type="text" id="f-title" class="field-input" placeholder="文章标题" />
+      </div>
+      <div class="meta-field meta-field-sm">
+        <label class="field-label">标签</label>
+        <input type="text" id="f-tag" class="field-input" placeholder="探索" />
+      </div>
+      <div class="meta-field meta-field-sm">
+        <label class="field-label">日期</label>
+        <input type="date" id="f-date" class="field-input" />
+      </div>
+    </div>
+    <div class="meta-row">
+      <div class="meta-field">
+        <label class="field-label">摘要</label>
+        <input type="text" id="f-excerpt" class="field-input" placeholder="一句话简介" />
+      </div>
+    </div>
+
+    <!-- 工具栏 -->
+    <div class="toolbar">
+      <button class="tool-btn" data-action="h2" title="标题">H</button>
+      <button class="tool-btn" data-action="bold" title="加粗"><b>B</b></button>
+      <button class="tool-btn" data-action="italic" title="斜体"><i>I</i></button>
+      <div class="toolbar-sep"></div>
+      <button class="tool-btn" data-action="ul" title="列表">≡</button>
+      <button class="tool-btn" data-action="quote" title="引用">"</button>
+      <div class="toolbar-sep"></div>
+      <button class="tool-btn" data-action="link" title="链接">🔗</button>
+      <button class="tool-btn" data-action="img" title="图片">🖼</button>
+      <div class="toolbar-sep"></div>
+      <button class="tool-btn" data-action="hr" title="分割线">—</button>
+      <div style="flex:1"></div>
+      <button class="tool-btn" id="preview-toggle">预览</button>
+    </div>
+
+    <!-- 编辑区 -->
+    <div class="editor-body">
+      <textarea id="editor" class="editor-textarea" placeholder="开始写吧…"></textarea>
+      <div id="preview-pane" class="preview-pane post-content" style="display:none;"></div>
+    </div>
+
+    <div class="pub-feedback" id="pub-feedback"></div>
+  </div>
+
+</div>
+</Base>
+
+<script>
+  const REPO = 'kariiidayu-create/starryfield';
+  const TOKEN_KEY = 'sf-write-token';
+
+  function getToken() { return localStorage.getItem(TOKEN_KEY) || ''; }
+
+  function init() {
+    const token = getToken();
+    if (!token) {
+      document.getElementById('token-screen')!.style.display = 'flex';
+    } else {
+      document.getElementById('editor-screen')!.style.display = 'block';
+      // 默认今天日期
+      const d = new Date();
+      const pad = (n: number) => String(n).padStart(2,'0');
+      (document.getElementById('f-date') as HTMLInputElement).value = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+    }
+  }
+
+  // 保存 token
+  document.getElementById('token-save-btn')?.addEventListener('click', () => {
+    const val = (document.getElementById('token-input') as HTMLInputElement).value.trim();
+    if (!val) return;
+    localStorage.setItem(TOKEN_KEY, val);
+    document.getElementById('token-screen')!.style.display = 'none';
+    document.getElementById('editor-screen')!.style.display = 'block';
+    const d = new Date();
+    const pad = (n: number) => String(n).padStart(2,'0');
+    (document.getElementById('f-date') as HTMLInputElement).value = `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  });
+
+  // 重设 token
+  document.getElementById('settings-btn')?.addEventListener('click', () => {
+    localStorage.removeItem(TOKEN_KEY);
+    document.getElementById('editor-screen')!.style.display = 'none';
+    document.getElementById('token-screen')!.style.display = 'flex';
+    (document.getElementById('token-input') as HTMLInputElement).value = '';
+  });
+
+  // 工具栏
+  const editor = document.getElementById('editor') as HTMLTextAreaElement;
+
+  function wrapSelection(before: string, after = '', placeholder = '') {
+    const start = editor.selectionStart;
+    const end = editor.selectionEnd;
+    const sel = editor.value.slice(start, end) || placeholder;
+    editor.value = editor.value.slice(0, start) + before + sel + after + editor.value.slice(end);
+    editor.focus();
+    editor.setSelectionRange(start + before.length, start + before.length + sel.length);
+  }
+
+  function insertLine(prefix: string) {
+    const start = editor.selectionStart;
+    const lineStart = editor.value.lastIndexOf('\n', start - 1) + 1;
+    editor.value = editor.value.slice(0, lineStart) + prefix + editor.value.slice(lineStart);
+    editor.focus();
+  }
+
+  document.querySelectorAll('.tool-btn[data-action]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const action = btn.getAttribute('data-action');
+      if (action === 'bold') wrapSelection('**', '**', '加粗文字');
+      else if (action === 'italic') wrapSelection('*', '*', '斜体文字');
+      else if (action === 'h2') insertLine('## ');
+      else if (action === 'ul') insertLine('- ');
+      else if (action === 'quote') insertLine('> ');
+      else if (action === 'hr') { editor.value += '\n\n---\n\n'; editor.focus(); }
+      else if (action === 'link') {
+        const url = prompt('链接地址：');
+        if (url) wrapSelection('[', `](${url})`, '链接文字');
+      } else if (action === 'img') {
+        const url = prompt('图片地址：');
+        if (url) { editor.value += `\n![图片](${url})\n`; editor.focus(); }
+      }
+    });
+  });
+
+  // 预览
+  let previewOn = false;
+  document.getElementById('preview-toggle')?.addEventListener('click', async () => {
+    previewOn = !previewOn;
+    const pane = document.getElementById('preview-pane')!;
+    if (previewOn) {
+      editor.style.display = 'none';
+      pane.style.display = 'block';
+      // 简单 markdown 渲染
+      pane.innerHTML = simpleMarkdown(editor.value);
+    } else {
+      editor.style.display = 'block';
+      pane.style.display = 'none';
+    }
+    (document.getElementById('preview-toggle') as HTMLButtonElement).textContent = previewOn ? '编辑' : '预览';
+  });
+
+  function simpleMarkdown(md: string) {
+    return md
+      .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+      .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+      .replace(/^# (.+)$/gm, '<h1>$1</h1>')
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g, '<em>$1</em>')
+      .replace(/^> (.+)$/gm, '<blockquote>$1</blockquote>')
+      .replace(/^- (.+)$/gm, '<li>$1</li>')
+      .replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>')
+      .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2">$1</a>')
+      .replace(/!\[(.+?)\]\((.+?)\)/g, '<img src="$2" alt="$1" />')
+      .replace(/^---$/gm, '<hr>')
+      .replace(/\n\n/g, '</p><p>')
+      .replace(/^(?!<[hbulia])(.+)$/gm, '$1')
+      .replace(/^<\/p><p>$/, '')
+      .trim();
+  }
+
+  // 发布
+  document.getElementById('publish-btn')?.addEventListener('click', async () => {
+    const title = (document.getElementById('f-title') as HTMLInputElement).value.trim();
+    const tag = (document.getElementById('f-tag') as HTMLInputElement).value.trim() || '探索';
+    const date = (document.getElementById('f-date') as HTMLInputElement).value;
+    const excerpt = (document.getElementById('f-excerpt') as HTMLInputElement).value.trim();
+    const body = editor.value.trim();
+    const fb = document.getElementById('pub-feedback')!;
+
+    if (!title) { fb.textContent = '请填写标题'; fb.className = 'pub-feedback error'; return; }
+    if (!body) { fb.textContent = '内容不能为空'; fb.className = 'pub-feedback error'; return; }
+
+    const slug = title.toLowerCase().replace(/\s+/g, '-').replace(/[^\w\-]/g, '').slice(0, 50) || Date.now().toString();
+    const frontmatter = `---\ntitle: "${title}"\ntag: "${tag}"\ndate: ${date}\nexcerpt: "${excerpt}"\n---\n\n`;
+    const content = frontmatter + body;
+    const filePath = `src/content/explorations/${slug}.md`;
+    const token = getToken();
+
+    const btn = document.getElementById('publish-btn') as HTMLButtonElement;
+    btn.disabled = true;
+    btn.textContent = '发布中…';
+    fb.textContent = '';
+
+    try {
+      const res = await fetch(`https://api.github.com/repos/${REPO}/contents/${filePath}`, {
+        method: 'PUT',
+        headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: `post: ${title}`,
+          content: btoa(unescape(encodeURIComponent(content))),
+        }),
+      });
+
+      if (res.ok) {
+        fb.textContent = '✓ 发布成功！Cloudflare 正在构建，约 1 分钟后上线。';
+        fb.className = 'pub-feedback success';
+        editor.value = '';
+        (document.getElementById('f-title') as HTMLInputElement).value = '';
+        (document.getElementById('f-excerpt') as HTMLInputElement).value = '';
+      } else {
+        const err = await res.json();
+        throw new Error(err.message || '发布失败');
+      }
+    } catch (e: any) {
+      fb.textContent = '发布失败：' + (e.message || '请检查 Token 是否有效');
+      fb.className = 'pub-feedback error';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = '发布';
+    }
+  });
+
+  init();
+</script>
+
+<style>
+  .write-page { max-width: 800px; margin: 0 auto; padding: 20px 0 60px; }
+
+  /* Token 屏 */
+  #token-screen { display: flex; align-items: center; justify-content: center; min-height: 60vh; }
+  .token-wrap { display: flex; flex-direction: column; gap: 14px; max-width: 480px; width: 100%; }
+  .token-label { font-family: var(--pixel-font); font-size: 13px; color: var(--cyan); margin: 0; }
+  .token-hint { font-size: 13px; color: var(--text-dim); line-height: 1.6; margin: 0; }
+
+  /* 编辑器头 */
+  .editor-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; }
+  .editor-heading { font-family: var(--pixel-font); font-size: 16px; color: var(--cyan); margin: 0; }
+  .editor-header-actions { display: flex; gap: 10px; align-items: center; }
+
+  /* 元数据 */
+  .meta-row { display: flex; gap: 12px; margin-bottom: 12px; flex-wrap: wrap; }
+  .meta-field { flex: 1; min-width: 160px; }
+  .meta-field-sm { flex: 0 0 140px; }
+  .field-label { display: block; font-family: var(--pixel-font); font-size: 10px; color: var(--text-dim); margin-bottom: 6px; }
+  .field-input {
+    width: 100%; background: var(--bg-card); border: 1px solid rgba(0,255,245,0.15);
+    border-radius: 2px; padding: 9px 12px; font-family: var(--mono-font);
+    font-size: 14px; color: var(--text); box-sizing: border-box; outline: none;
+    transition: border-color 0.2s;
+  }
+  .field-input:focus { border-color: var(--cyan); }
+  .field-input::placeholder { color: rgba(255,255,255,0.2); }
+  input[type="date"].field-input::-webkit-calendar-picker-indicator { filter: invert(0.6); }
+
+  /* 工具栏 */
+  .toolbar {
+    display: flex; align-items: center; gap: 2px;
+    background: var(--bg-card); border: 1px solid rgba(0,255,245,0.15);
+    border-bottom: none; border-radius: 2px 2px 0 0; padding: 6px 8px;
+    flex-wrap: wrap;
+  }
+  .tool-btn {
+    background: transparent; border: none; color: var(--text-dim);
+    font-size: 13px; padding: 5px 8px; cursor: pointer; border-radius: 2px;
+    font-family: var(--mono-font); transition: all 0.15s; line-height: 1;
+  }
+  .tool-btn:hover { background: rgba(0,255,245,0.1); color: var(--cyan); }
+  .toolbar-sep { width: 1px; height: 16px; background: rgba(0,255,245,0.15); margin: 0 4px; }
+
+  /* 编辑区 */
+  .editor-body { position: relative; }
+  .editor-textarea {
+    width: 100%; min-height: 420px; background: var(--bg-card);
+    border: 1px solid rgba(0,255,245,0.15); border-radius: 0 0 2px 2px;
+    padding: 20px; font-family: var(--mono-font); font-size: 15px;
+    color: var(--text); box-sizing: border-box; outline: none; resize: vertical;
+    line-height: 1.8;
+  }
+  .editor-textarea:focus { border-color: rgba(0,255,245,0.3); }
+  .editor-textarea::placeholder { color: rgba(255,255,255,0.15); }
+  .preview-pane {
+    min-height: 420px; background: var(--bg-card);
+    border: 1px solid rgba(0,255,245,0.15); border-radius: 0 0 2px 2px;
+    padding: 20px; box-sizing: border-box;
+  }
+
+  /* 按钮 */
+  .pub-btn {
+    font-family: var(--pixel-font); font-size: 12px; background: var(--cyan);
+    color: #000; border: none; padding: 9px 20px; border-radius: 2px;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .pub-btn:hover { box-shadow: 0 0 12px rgba(0,255,245,0.4); }
+  .pub-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .ghost-btn {
+    background: transparent; border: 1px solid rgba(0,255,245,0.2);
+    color: var(--text-dim); padding: 7px 10px; border-radius: 2px; cursor: pointer; font-size: 14px;
+  }
+  .ghost-btn:hover { border-color: var(--cyan); color: var(--cyan); }
+
+  /* 反馈 */
+  .pub-feedback { margin-top: 16px; font-size: 13px; font-family: var(--mono-font); min-height: 20px; }
+  .pub-feedback.success { color: var(--cyan); }
+  .pub-feedback.error { color: #ff6b6b; }
+
+  @media (max-width: 640px) {
+    .meta-field-sm { flex: 1 1 120px; }
+  }
+</style>

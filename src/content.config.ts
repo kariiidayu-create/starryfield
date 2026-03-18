@@ -1,6 +1,8 @@
 import { defineCollection, z } from 'astro:content';
 import { glob } from 'astro/loaders';
 
+const interaction = z.string().optional();
+
 const games = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/games' }),
   schema: z.object({
@@ -11,6 +13,7 @@ const games = defineCollection({
     rating: z.string().optional(),
     note: z.string(),
     order: z.number().optional(),
+    interaction,
   }),
 });
 
@@ -22,6 +25,7 @@ const explorations = defineCollection({
     date: z.string(),
     excerpt: z.string(),
     location: z.object({ name: z.string(), lat: z.number(), lng: z.number() }).optional(),
+    interaction,
   }),
 });
 
@@ -35,6 +39,7 @@ const crafts = defineCollection({
     note: z.string(),
     order: z.number().optional(),
     process: z.array(z.object({ src: z.string(), label: z.string().optional() })).optional(),
+    interaction,
   }),
 });
 
@@ -48,6 +53,7 @@ const drawings = defineCollection({
     note: z.string(),
     order: z.number().optional(),
     process: z.array(z.object({ src: z.string(), label: z.string().optional() })).optional(),
+    interaction,
   }),
 });
 
@@ -60,6 +66,7 @@ const cooking = defineCollection({
     cover: z.string(),
     note: z.string(),
     order: z.number().optional(),
+    interaction,
   }),
 });
 

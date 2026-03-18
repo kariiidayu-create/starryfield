@@ -1,0 +1,199 @@
+---
+import Base from '../layouts/Base.astro';
+---
+
+<Base title="✦" description="">
+  <div class="space-page">
+
+    <!-- 锁屏 -->
+    <div id="lock-screen">
+      <div class="lock-wrap">
+        <div class="lock-icon">
+          <svg viewBox="0 0 16 16" width="32" height="32" fill="none">
+            <rect x="3" y="7" width="10" height="8" rx="1" stroke="var(--cyan)" stroke-width="1.5"/>
+            <path d="M5 7V5a3 3 0 016 0v2" stroke="var(--cyan)" stroke-width="1.5" fill="none"/>
+          </svg>
+        </div>
+        <input type="password" id="lock-input" class="lock-input" placeholder="···" autocomplete="off" />
+        <div class="lock-hint" id="lock-hint"></div>
+      </div>
+    </div>
+
+    <!-- 内容区（解锁后显示） -->
+    <div id="space-content" style="display:none;">
+      <div class="space-header">
+        <h1 class="space-title">✦ 我的空间</h1>
+        <button class="space-lock-btn" id="lock-btn" title="锁定">
+          <svg viewBox="0 0 16 16" width="14" height="14" fill="none">
+            <rect x="3" y="7" width="10" height="8" rx="1" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M5 7V5a3 3 0 016 0v2" stroke="currentColor" stroke-width="1.5" fill="none"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- 新建日记 -->
+      <div class="entry-form">
+        <input class="entry-title-input" id="entry-title" type="text" placeholder="标题（可选）" />
+        <textarea class="entry-body-input" id="entry-body" placeholder="写点什么…" rows="8"></textarea>
+        <div class="entry-form-footer">
+          <span class="entry-date-preview" id="entry-date-preview"></span>
+          <button class="save-btn" id="save-btn">保存</button>
+        </div>
+      </div>
+
+      <!-- 日记列表 -->
+      <div class="entries-list" id="entries-list"></div>
+    </div>
+
+  </div>
+</Base>
+
+<script>
+  const PASSWORD = 'cool-summer-night';
+  const STORAGE_KEY = 'sf-space-entries';
+
+  function unlock() {
+    document.getElementById('lock-screen')!.style.display = 'none';
+    document.getElementById('space-content')!.style.display = 'block';
+    renderEntries();
+    updateDatePreview();
+  }
+
+  // 检查session
+  if (sessionStorage.getItem('sf-space-unlocked') === '1') unlock();
+
+  // 输入密码
+  const input = document.getElementById('lock-input') as HTMLInputElement;
+  input?.addEventListener('keydown', (e) => {
+    if (e.key !== 'Enter') return;
+    if (input.value === PASSWORD) {
+      sessionStorage.setItem('sf-space-unlocked', '1');
+      unlock();
+    } else {
+      const hint = document.getElementById('lock-hint')!;
+      hint.textContent = '不对';
+      input.value = '';
+      setTimeout(() => hint.textContent = '', 2000);
+    }
+  });
+
+  // 锁定
+  document.getElementById('lock-btn')?.addEventListener('click', () => {
+    sessionStorage.removeItem('sf-space-unlocked');
+    document.getElementById('space-content')!.style.display = 'none';
+    document.getElementById('lock-screen')!.style.display = 'flex';
+    input.value = '';
+  });
+
+  // 日期预览
+  function updateDatePreview() {
+    const el = document.getElementById('entry-date-preview');
+    if (el) el.textContent = new Date().toLocaleString('zh-CN', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
+  }
+
+  // 保存
+  document.getElementById('save-btn')?.addEventListener('click', () => {
+    const title = (document.getElementById('entry-title') as HTMLInputElement).value.trim();
+    const body = (document.getElementById('entry-body') as HTMLTextAreaElement).value.trim();
+    if (!body) return;
+    const entries = getEntries();
+    entries.unshift({ id: Date.now(), title, body, date: new Date().toISOString() });
+    saveEntries(entries);
+    (document.getElementById('entry-title') as HTMLInputElement).value = '';
+    (document.getElementById('entry-body') as HTMLTextAreaElement).value = '';
+    renderEntries();
+  });
+
+  function getEntries(): Array<{id: number; title: string; body: string; date: string}> {
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch { return []; }
+  }
+
+  function saveEntries(entries: Array<{id: number; title: string; body: string; date: string}>) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(entries));
+  }
+
+  function renderEntries() {
+    const list = document.getElementById('entries-list')!;
+    const entries = getEntries();
+    if (!entries.length) { list.innerHTML = '<div class="entry-empty">这里还什么都没有。</div>'; return; }
+    list.innerHTML = entries.map(e => `
+      <div class="entry-item" id="ei-${e.id}">
+        <div class="entry-item-header">
+          <span class="entry-item-title">${e.title || '无题'}</span>
+          <span class="entry-item-date">${new Date(e.date).toLocaleString('zh-CN', {year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})}</span>
+        </div>
+        <div class="entry-item-body">${e.body.replace(/\n/g, '<br>')}</div>
+        <button class="entry-delete-btn" onclick="deleteEntry(${e.id})">删除</button>
+      </div>
+    `).join('');
+  }
+
+  function deleteEntry(id: number) {
+    if (!confirm('确定删除这篇？')) return;
+    saveEntries(getEntries().filter(e => e.id !== id));
+    renderEntries();
+  }
+
+  (window as any).deleteEntry = deleteEntry;
+</script>
+
+<style>
+  .space-page { max-width: 700px; margin: 0 auto; padding: 20px 0 60px; }
+
+  /* 锁屏 */
+  #lock-screen {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+  }
+  .lock-wrap { display: flex; flex-direction: column; align-items: center; gap: 20px; }
+  .lock-icon { opacity: 0.6; }
+  .lock-input {
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid rgba(0,255,245,0.3);
+    color: var(--text);
+    font-size: 20px;
+    text-align: center;
+    padding: 8px 0;
+    width: 160px;
+    letter-spacing: 8px;
+    outline: none;
+  }
+  .lock-input:focus { border-bottom-color: var(--cyan); }
+  .lock-hint { font-size: 12px; color: #ff6b6b; font-family: var(--mono-font); height: 16px; }
+
+  /* 内容区 */
+  .space-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 32px; }
+  .space-title { font-family: var(--pixel-font); font-size: 16px; color: var(--cyan); margin: 0; }
+  .space-lock-btn { background: transparent; border: none; color: var(--text-dim); cursor: pointer; padding: 4px; }
+  .space-lock-btn:hover { color: var(--cyan); }
+
+  /* 编辑器 */
+  .entry-form { background: var(--bg-card); border: 1px solid rgba(0,255,245,0.1); border-radius: 2px; padding: 20px; margin-bottom: 32px; }
+  .entry-title-input, .entry-body-input {
+    width: 100%; background: transparent; border: none;
+    border-bottom: 1px solid rgba(0,255,245,0.1);
+    color: var(--text); font-family: var(--mono-font);
+    font-size: 14px; padding: 8px 0; box-sizing: border-box; outline: none; resize: none;
+  }
+  .entry-title-input { font-size: 16px; margin-bottom: 16px; }
+  .entry-title-input::placeholder, .entry-body-input::placeholder { color: rgba(255,255,255,0.2); }
+  .entry-body-input { border-bottom: none; margin-top: 12px; line-height: 1.8; }
+  .entry-form-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 16px; padding-top: 12px; border-top: 1px solid rgba(0,255,245,0.08); }
+  .entry-date-preview { font-size: 12px; color: var(--text-dim); font-family: var(--mono-font); }
+  .save-btn { font-family: var(--pixel-font); font-size: 11px; background: var(--cyan); color: #000; border: none; padding: 8px 16px; border-radius: 2px; cursor: pointer; }
+  .save-btn:hover { box-shadow: 0 0 10px rgba(0,255,245,0.3); }
+
+  /* 日记列表 */
+  .entries-list { display: flex; flex-direction: column; gap: 16px; }
+  .entry-empty { color: var(--text-dim); font-size: 14px; text-align: center; padding: 40px 0; }
+  .entry-item { background: var(--bg-card); border: 1px solid rgba(0,255,245,0.08); border-radius: 2px; padding: 20px; }
+  .entry-item-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; gap: 12px; }
+  .entry-item-title { font-family: var(--pixel-font); font-size: 12px; color: var(--cyan); }
+  .entry-item-date { font-size: 11px; color: var(--text-dim); font-family: var(--mono-font); flex-shrink: 0; }
+  .entry-item-body { font-size: 14px; color: var(--text); line-height: 1.8; white-space: pre-wrap; }
+  .entry-delete-btn { margin-top: 12px; background: transparent; border: none; font-size: 12px; color: rgba(255,107,107,0.4); cursor: pointer; padding: 0; font-family: var(--mono-font); }
+  .entry-delete-btn:hover { color: #ff6b6b; }
+</style>

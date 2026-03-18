@@ -4,6 +4,7 @@ import Comments from '../../components/Comments.astro';
 import Reactions from '../../components/Reactions.astro';
 import Share from '../../components/Share.astro';
 import TOC from '../../components/TOC.astro';
+import ScrollTimeline from '../../components/interactions/ScrollTimeline.astro';
 import { getCollection, render } from 'astro:content';
 import { getReadingTime } from '../../utils/reading-time';
 
@@ -15,10 +16,11 @@ export async function getStaticPaths() {
 const { game } = Astro.props;
 const { Content, headings } = await render(game);
 const readingTime = getReadingTime(game.body || '');
+const interaction = game.data.interaction;
 ---
 
 <Base title={game.data.title}>
-  <div class="article-layout">
+  <div class={`article-layout ${interaction === 'scroll-timeline' ? 'scroll-timeline' : ''}`}>
     <article style="padding: 20px 0; max-width: 700px; flex: 1; min-width: 0;">
       <div class="post-header">
         <div class="post-meta" style="margin-bottom: 16px;">
@@ -42,4 +44,5 @@ const readingTime = getReadingTime(game.body || '');
     </article>
     <TOC headings={headings} />
   </div>
+  {interaction === 'scroll-timeline' && <ScrollTimeline />}
 </Base>

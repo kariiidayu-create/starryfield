@@ -1,0 +1,89 @@
+---
+// ScrollTimeline — 滚动时间轴交互
+// 文章内容的每个段落/图片/标题随滚动依次"演"出来
+---
+
+<style is:global>
+  .scroll-timeline .post-content > * {
+    opacity: 0;
+    transform: translateY(32px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+
+  .scroll-timeline .post-content > *.st-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* 图片从侧面滑入 */
+  .scroll-timeline .post-content > p:has(img) {
+    transform: translateX(-40px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+
+  .scroll-timeline .post-content > p:has(img).st-visible {
+    transform: translateX(0);
+  }
+
+  /* 标题带一点缩放 */
+  .scroll-timeline .post-content > h1,
+  .scroll-timeline .post-content > h2,
+  .scroll-timeline .post-content > h3 {
+    transform: translateY(24px) scale(0.97);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+
+  .scroll-timeline .post-content > h1.st-visible,
+  .scroll-timeline .post-content > h2.st-visible,
+  .scroll-timeline .post-content > h3.st-visible {
+    transform: translateY(0) scale(1);
+  }
+
+  /* blockquote 从右边滑入 */
+  .scroll-timeline .post-content > blockquote {
+    transform: translateX(40px);
+    transition: opacity 0.7s ease, transform 0.7s ease;
+  }
+
+  .scroll-timeline .post-content > blockquote.st-visible {
+    transform: translateX(0);
+  }
+
+  /* 交错延迟 */
+  .scroll-timeline .post-content > *.st-delay-1 { transition-delay: 0.05s; }
+  .scroll-timeline .post-content > *.st-delay-2 { transition-delay: 0.1s; }
+  .scroll-timeline .post-content > *.st-delay-3 { transition-delay: 0.15s; }
+</style>
+
+<script>
+  function initScrollTimeline() {
+    const wrapper = document.querySelector('.scroll-timeline');
+    if (!wrapper) return;
+
+    const content = wrapper.querySelector('.post-content');
+    if (!content) return;
+
+    const children = Array.from(content.children) as HTMLElement[];
+
+    children.forEach((el, i) => {
+      el.classList.add(`st-delay-${(i % 3) + 1}`);
+    });
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            (entry.target as HTMLElement).classList.add('st-visible');
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.15, rootMargin: '0px 0px -60px 0px' }
+    );
+
+    children.forEach((el) => observer.observe(el));
+  }
+
+  document.addEventListener('astro:page-load', initScrollTimeline);
+  initScrollTimeline();
+</script>
