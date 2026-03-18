@@ -1,0 +1,300 @@
+---
+import Base from '../layouts/Base.astro';
+import PixelIcon from '../components/PixelIcon.astro';
+---
+
+<Base title="Steam 数据">
+  <section style="padding: 20px 0; max-width: 900px;">
+    <h2 class="section-title">
+      <PixelIcon name="gamepad" size={20} /> Steam 数据
+    </h2>
+    <p style="font-size: 14px; color: var(--text-dim); margin-bottom: 32px; font-family: var(--mono-font);">
+      > SELECT stats FROM steam WHERE player = '星見眠';
+    </p>
+
+    <div id="loading" style="text-align: center; padding: 60px 0; font-family: var(--mono-font); font-size: 14px; color: var(--text-dim);">
+      // LOADING STEAM DATA...
+    </div>
+
+    <div id="steam-content" style="display: none;">
+      <!-- 总览 -->
+      <div class="stat-overview">
+        <div class="stat-box">
+          <div class="stat-number" id="total-games">-</div>
+          <div class="stat-label">游戏</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-number" id="total-hours">-</div>
+          <div class="stat-label">小时</div>
+        </div>
+        <div class="stat-box">
+          <div class="stat-number" id="avg-hours">-</div>
+          <div class="stat-label">平均时长</div>
+        </div>
+      </div>
+
+      <!-- 最近在玩 -->
+      <h3 class="sub-title">最近在玩</h3>
+      <div class="recent-grid" id="recent-games"></div>
+
+      <!-- 游玩时长排行 -->
+      <h3 class="sub-title">游玩时长排行</h3>
+      <div class="top-list" id="top-games"></div>
+    </div>
+
+    <div id="error" style="display: none; text-align: center; padding: 60px 0; font-family: var(--mono-font); font-size: 14px; color: var(--magenta);">
+      // ERROR: FAILED TO LOAD STEAM DATA
+    </div>
+  </section>
+
+  <script>
+    const API = 'https://steam-api.kariiidayu.workers.dev/stats';
+
+    async function loadSteam() {
+      try {
+        const res = await fetch(API);
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+        render(data);
+      } catch (e) {
+        document.getElementById('loading')!.style.display = 'none';
+        document.getElementById('error')!.style.display = 'block';
+      }
+    }
+
+    function timeAgo(ts: number) {
+      const diff = Math.floor(Date.now() / 1000) - ts;
+      if (diff < 3600) return `${Math.floor(diff / 60)} 分钟前`;
+      if (diff < 86400) return `${Math.floor(diff / 3600)} 小时前`;
+      if (diff < 604800) return `${Math.floor(diff / 86400)} 天前`;
+      return new Date(ts * 1000).toLocaleDateString('zh-CN');
+    }
+
+    function render(data: any) {
+      document.getElementById('loading')!.style.display = 'none';
+      document.getElementById('steam-content')!.style.display = 'block';
+
+      // 总览
+      document.getElementById('total-games')!.textContent = data.total_games;
+      document.getElementById('total-hours')!.textContent = data.total_hours.toLocaleString();
+      const avg = (data.total_hours / data.total_games).toFixed(1);
+      document.getElementById('avg-hours')!.textContent = avg + 'h';
+
+      // 最近在玩
+      const recentEl = document.getElementById('recent-games')!;
+      recentEl.innerHTML = data.recent_games.map((g: any) => `
+        <a href="https://store.steampowered.com/app/${g.appid}" target="_blank" rel="noopener" class="recent-card">
+          <img src="${g.header}" alt="${g.name}" class="recent-img" loading="lazy" />
+          <div class="recent-info">
+            <div class="recent-name">${g.name}</div>
+            <div class="recent-meta">${g.hours}h · ${timeAgo(g.last_played)}</div>
+          </div>
+        </a>
+      `).join('');
+
+      // 游玩时长排行
+      const topEl = document.getElementById('top-games')!;
+      const maxHours = data.top_games[0]?.hours || 1;
+      topEl.innerHTML = data.top_games.map((g: any, i: number) => `
+        <a href="https://store.steampowered.com/app/${g.appid}" target="_blank" rel="noopener" class="top-item">
+          <span class="top-rank">${String(i + 1).padStart(2, '0')}</span>
+          <img src="${g.icon}" alt="${g.name}" class="top-icon" loading="lazy" />
+          <span class="top-name">${g.name}</span>
+          <div class="top-bar-wrap">
+            <div class="top-bar" style="width: ${(g.hours / maxHours * 100).toFixed(1)}%"></div>
+          </div>
+          <span class="top-hours">${g.hours}h</span>
+        </a>
+      `).join('');
+    }
+
+    loadSteam();
+  </script>
+
+  <style>
+    /* 总览 */
+    .stat-overview {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 40px;
+    }
+
+    .stat-box {
+      flex: 1;
+      background: var(--bg-card);
+      border: 1px solid rgba(0, 255, 245, 0.15);
+      border-radius: 2px;
+      padding: 24px;
+      text-align: center;
+    }
+
+    .stat-number {
+      font-family: var(--pixel-font);
+      font-size: 28px;
+      color: var(--cyan);
+      text-shadow: var(--glow-cyan);
+      margin-bottom: 8px;
+    }
+
+    .stat-label {
+      font-family: var(--mono-font);
+      font-size: 13px;
+      color: var(--text-dim);
+    }
+
+    /* 小标题 */
+    .sub-title {
+      font-family: var(--pixel-font);
+      font-size: 14px;
+      color: var(--cyan);
+      text-shadow: var(--glow-cyan);
+      margin-bottom: 20px;
+      padding-bottom: 8px;
+      border-bottom: 1px dashed rgba(0, 255, 245, 0.2);
+    }
+
+    /* 最近在玩 */
+    .recent-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 16px;
+      margin-bottom: 40px;
+    }
+
+    .recent-card {
+      background: var(--bg-card);
+      border: 1px solid rgba(0, 255, 245, 0.1);
+      border-radius: 2px;
+      overflow: hidden;
+      text-decoration: none;
+      transition: all 0.3s;
+      display: block;
+    }
+
+    .recent-card:hover {
+      border-color: rgba(0, 255, 245, 0.4);
+      transform: translateY(-2px);
+      box-shadow: var(--glow-cyan);
+    }
+
+    .recent-img {
+      width: 100%;
+      aspect-ratio: 460/215;
+      object-fit: cover;
+      display: block;
+    }
+
+    .recent-info {
+      padding: 12px 16px;
+    }
+
+    .recent-name {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .recent-meta {
+      font-family: var(--mono-font);
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    /* 时长排行 */
+    .top-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 40px;
+    }
+
+    .top-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 16px;
+      background: var(--bg-card);
+      border: 1px solid rgba(0, 255, 245, 0.08);
+      border-radius: 2px;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    .top-item:hover {
+      border-color: rgba(0, 255, 245, 0.3);
+      background: rgba(0, 255, 245, 0.03);
+    }
+
+    .top-rank {
+      font-family: var(--pixel-font);
+      font-size: 12px;
+      color: var(--text-dim);
+      min-width: 24px;
+    }
+
+    .top-item:nth-child(1) .top-rank { color: var(--cyan); text-shadow: var(--glow-cyan); }
+    .top-item:nth-child(2) .top-rank { color: var(--magenta); }
+    .top-item:nth-child(3) .top-rank { color: var(--purple); }
+
+    .top-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    .top-name {
+      font-size: 14px;
+      color: var(--text);
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      flex-shrink: 1;
+    }
+
+    .top-bar-wrap {
+      flex: 1;
+      height: 4px;
+      background: rgba(0, 255, 245, 0.08);
+      border-radius: 2px;
+      min-width: 60px;
+    }
+
+    .top-bar {
+      height: 100%;
+      background: linear-gradient(90deg, var(--cyan), var(--purple));
+      border-radius: 2px;
+      transition: width 0.6s ease;
+    }
+
+    .top-hours {
+      font-family: var(--mono-font);
+      font-size: 13px;
+      color: var(--cyan);
+      min-width: 60px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    /* 移动端适配 */
+    @media (max-width: 600px) {
+      .stat-overview {
+        flex-direction: column;
+      }
+      .stat-number {
+        font-size: 22px;
+      }
+      .top-name {
+        max-width: 120px;
+      }
+      .top-bar-wrap {
+        min-width: 40px;
+      }
+    }
+  </style>
+</Base>
