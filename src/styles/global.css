@@ -409,17 +409,26 @@ body::after {
   top: 100%;
   left: 50%;
   transform: translateX(-50%);
-  margin-top: 10px;
   background: var(--bg-card);
   border: 1px solid rgba(0, 255, 245, 0.2);
   border-radius: 2px;
   padding: 8px 0;
   min-width: 120px;
+  margin-top: 0;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 0.2s, transform 0.2s;
-  transform: translateX(-50%) translateY(-4px);
+  transition: opacity 0.2s;
   z-index: 100;
+}
+
+/* 透明桥接区域，防止鼠标移动时 hover 断开 */
+.nav-dropdown-menu::before {
+  content: '';
+  position: absolute;
+  top: -12px;
+  left: 0;
+  right: 0;
+  height: 12px;
 }
 
 .nav-dropdown:hover .nav-dropdown-menu {
