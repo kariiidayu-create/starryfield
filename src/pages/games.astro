@@ -16,27 +16,322 @@ const games = allGames.sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99
       > SELECT * FROM games ORDER BY love DESC;
     </p>
 
-    <div class="game-grid">
-      {games.map(game => (
-        <a href={`/games/${game.id}`} class="game-card" style="text-decoration: none;">
-          {game.data.cover ? (
-            <img class="game-card-img" src={game.data.cover} alt={game.data.title} />
-          ) : (
-            <div style="width: 100%; aspect-ratio: 3/4; background: linear-gradient(135deg, var(--bg-card) 0%, rgba(0,255,245,0.05) 100%); display: flex; align-items: center; justify-content: center; border-bottom: 1px solid rgba(0,255,245,0.1);">
-              <span style="font-family: var(--pixel-font); font-size: 24px; opacity: 0.3;">?</span>
+    <!-- 游戏文章 -->
+    {games.length > 0 && (
+      <div class="game-grid">
+        {games.map(game => (
+          <a href={`/games/${game.id}`} class="game-card" style="text-decoration: none;">
+            {game.data.cover ? (
+              <img class="game-card-img" src={game.data.cover} alt={game.data.title} />
+            ) : (
+              <div style="width: 100%; aspect-ratio: 3/4; background: linear-gradient(135deg, var(--bg-card) 0%, rgba(0,255,245,0.05) 100%); display: flex; align-items: center; justify-content: center; border-bottom: 1px solid rgba(0,255,245,0.1);">
+                <span style="font-family: var(--pixel-font); font-size: 24px; opacity: 0.3;">?</span>
+              </div>
+            )}
+            <div class="game-card-body">
+              <div class="game-card-title">{game.data.title}</div>
+              <div class="game-card-platform">{game.data.platform}</div>
+              <p style="font-size: 14px; color: var(--text-dim); margin-top: 6px; line-height: 1.5;">{game.data.note}</p>
             </div>
-          )}
-          <div class="game-card-body">
-            <div class="game-card-title">{game.data.title}</div>
-            <div class="game-card-platform">{game.data.platform}</div>
-            <p style="font-size: 14px; color: var(--text-dim); margin-top: 6px; line-height: 1.5;">{game.data.note}</p>
+          </a>
+        ))}
+      </div>
+    )}
+
+    <!-- Steam 数据 -->
+    <div class="steam-section">
+      <h3 class="steam-header">
+        <PixelIcon name="star" size={16} /> Steam 档案
+      </h3>
+
+      <div id="steam-loading" style="text-align: center; padding: 40px 0; font-family: var(--mono-font); font-size: 13px; color: var(--text-dim);">
+        // LOADING STEAM DATA...
+      </div>
+
+      <div id="steam-content" style="display: none;">
+        <!-- 总览 -->
+        <div class="steam-stats">
+          <span class="steam-stat"><span class="steam-stat-num" id="total-games">-</span> 游戏</span>
+          <span class="steam-stat-sep">·</span>
+          <span class="steam-stat"><span class="steam-stat-num" id="total-hours">-</span> 小时</span>
+          <span class="steam-stat-sep">·</span>
+          <span class="steam-stat">平均 <span class="steam-stat-num" id="avg-hours">-</span></span>
+        </div>
+
+        <!-- 最近在玩 -->
+        <div class="steam-block">
+          <div class="steam-block-title">最近在玩</div>
+          <div class="recent-list" id="recent-games"></div>
+        </div>
+
+        <!-- 游玩时长 TOP 10 -->
+        <div class="steam-block">
+          <div class="steam-block-title">时长排行</div>
+          <div class="top-list" id="top-games"></div>
+        </div>
+      </div>
+
+      <div id="steam-error" style="display: none; text-align: center; padding: 30px 0; font-family: var(--mono-font); font-size: 13px; color: var(--text-dim);">
+        // STEAM DATA UNAVAILABLE
+      </div>
+    </div>
+  </section>
+
+  <script>
+    const API = 'https://steam-api.kariiidayu.workers.dev/stats';
+
+    async function loadSteam() {
+      try {
+        const res = await fetch(API);
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+        render(data);
+      } catch (e) {
+        document.getElementById('steam-loading')!.style.display = 'none';
+        document.getElementById('steam-error')!.style.display = 'block';
+      }
+    }
+
+    function timeAgo(ts: number) {
+      const diff = Math.floor(Date.now() / 1000) - ts;
+      if (diff < 3600) return `${Math.floor(diff / 60)}分钟前`;
+      if (diff < 86400) return `${Math.floor(diff / 3600)}小时前`;
+      if (diff < 604800) return `${Math.floor(diff / 86400)}天前`;
+      return new Date(ts * 1000).toLocaleDateString('zh-CN');
+    }
+
+    function render(data: any) {
+      document.getElementById('steam-loading')!.style.display = 'none';
+      document.getElementById('steam-content')!.style.display = 'block';
+
+      document.getElementById('total-games')!.textContent = data.total_games;
+      document.getElementById('total-hours')!.textContent = data.total_hours.toLocaleString();
+      document.getElementById('avg-hours')!.textContent = (data.total_hours / data.total_games).toFixed(1) + 'h';
+
+      // 最近在玩 — 横向卡片
+      const recentEl = document.getElementById('recent-games')!;
+      recentEl.innerHTML = data.recent_games.slice(0, 6).map((g: any) => `
+        <a href="https://store.steampowered.com/app/${g.appid}" target="_blank" rel="noopener" class="recent-item">
+          <img src="${g.header}" alt="${g.name}" class="recent-cover" loading="lazy" />
+          <div class="recent-detail">
+            <div class="recent-name">${g.name}</div>
+            <div class="recent-meta">${g.hours}h · ${timeAgo(g.last_played)}</div>
           </div>
         </a>
-      ))}
-    </div>
+      `).join('');
 
-    <p style="font-family: var(--pixel-font); font-size: 13px; color: var(--text-dim); text-align: center; margin-top: 40px;">
-      // 持续更新中...
-    </p>
-  </section>
+      // 时长排行 — 紧凑列表
+      const topEl = document.getElementById('top-games')!;
+      const maxHours = data.top_games[0]?.hours || 1;
+      topEl.innerHTML = data.top_games.slice(0, 10).map((g: any, i: number) => `
+        <a href="https://store.steampowered.com/app/${g.appid}" target="_blank" rel="noopener" class="rank-row">
+          <span class="rank-num rank-${i < 3 ? i + 1 : 'n'}">${String(i + 1).padStart(2, '0')}</span>
+          <img src="${g.icon}" alt="" class="rank-icon" loading="lazy" />
+          <span class="rank-name">${g.name}</span>
+          <div class="rank-bar-bg"><div class="rank-bar-fill" style="width:${(g.hours / maxHours * 100).toFixed(1)}%"></div></div>
+          <span class="rank-hours">${g.hours}h</span>
+        </a>
+      `).join('');
+    }
+
+    loadSteam();
+  </script>
+
+  <style>
+    /* Steam 区域 */
+    .steam-section {
+      margin-top: 48px;
+      padding-top: 32px;
+      border-top: 1px dashed rgba(0, 255, 245, 0.15);
+    }
+
+    .steam-header {
+      font-family: var(--pixel-font);
+      font-size: 15px;
+      color: var(--cyan);
+      text-shadow: var(--glow-cyan);
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* 总览统计 — 一行 */
+    .steam-stats {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      margin-bottom: 32px;
+      font-family: var(--mono-font);
+      font-size: 14px;
+      color: var(--text-dim);
+    }
+
+    .steam-stat-num {
+      font-family: var(--pixel-font);
+      font-size: 20px;
+      color: var(--cyan);
+      text-shadow: var(--glow-cyan);
+    }
+
+    .steam-stat-sep {
+      color: rgba(0, 255, 245, 0.3);
+    }
+
+    /* 区块 */
+    .steam-block {
+      margin-bottom: 28px;
+    }
+
+    .steam-block-title {
+      font-family: var(--pixel-font);
+      font-size: 12px;
+      color: var(--text-dim);
+      margin-bottom: 12px;
+      letter-spacing: 1px;
+    }
+
+    /* 最近在玩 — 紧凑横向卡片 */
+    .recent-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 10px;
+    }
+
+    .recent-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 8px;
+      background: var(--bg-card);
+      border: 1px solid rgba(0, 255, 245, 0.08);
+      border-radius: 2px;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+
+    .recent-item:hover {
+      border-color: rgba(0, 255, 245, 0.3);
+      transform: translateX(4px);
+    }
+
+    .recent-cover {
+      width: 120px;
+      aspect-ratio: 460/215;
+      object-fit: cover;
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    .recent-detail {
+      min-width: 0;
+    }
+
+    .recent-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 4px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .recent-meta {
+      font-family: var(--mono-font);
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    /* 时长排行 */
+    .top-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .rank-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 12px;
+      text-decoration: none;
+      border-radius: 2px;
+      transition: background 0.15s;
+    }
+
+    .rank-row:hover {
+      background: rgba(0, 255, 245, 0.04);
+    }
+
+    .rank-num {
+      font-family: var(--pixel-font);
+      font-size: 11px;
+      color: var(--text-dim);
+      min-width: 22px;
+    }
+    .rank-1 { color: var(--cyan); text-shadow: var(--glow-cyan); }
+    .rank-2 { color: var(--magenta); }
+    .rank-3 { color: var(--purple); }
+
+    .rank-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    .rank-name {
+      font-size: 13px;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      min-width: 0;
+      flex-shrink: 1;
+    }
+
+    .rank-bar-bg {
+      flex: 1;
+      height: 3px;
+      background: rgba(0, 255, 245, 0.06);
+      border-radius: 2px;
+      min-width: 40px;
+    }
+
+    .rank-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--cyan), var(--purple));
+      border-radius: 2px;
+    }
+
+    .rank-hours {
+      font-family: var(--mono-font);
+      font-size: 12px;
+      color: var(--cyan);
+      min-width: 50px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    /* 移动端 */
+    @media (max-width: 600px) {
+      .steam-stats {
+        flex-wrap: wrap;
+        gap: 4px 8px;
+      }
+      .steam-stat-num {
+        font-size: 16px;
+      }
+      .recent-list {
+        grid-template-columns: 1fr;
+      }
+      .recent-cover {
+        width: 90px;
+      }
+      .rank-name {
+        max-width: 100px;
+      }
+    }
+  </style>
 </Base>
