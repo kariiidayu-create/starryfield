@@ -176,7 +176,7 @@ const games = allGames.sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99
     /* 最近在玩 — 封面卡片网格 */
     .recent-list {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
       gap: 12px;
     }
 
