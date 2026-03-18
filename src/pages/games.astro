@@ -119,7 +119,7 @@ const games = allGames.sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99
     loadSteam();
   </script>
 
-  <style>
+  <style is:global>
     /* Steam 区域 */
     .steam-section {
       margin-top: 48px;
@@ -258,6 +258,7 @@ const games = allGames.sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99
       }
       .recent-overlay {
         opacity: 1;
+        background: linear-gradient(transparent 20%, rgba(0, 0, 0, 0.9));
       }
     }
   </style>
