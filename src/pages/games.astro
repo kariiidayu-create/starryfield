@@ -156,7 +156,7 @@ const games = allGames.sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99
       gap: 8px;
     }
 
-    /* 总览统计 — 一行 */
+    /* 总览统计 */
     .steam-stats {
       display: flex;
       align-items: baseline;
@@ -180,58 +180,56 @@ const games = allGames.sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99
 
     /* 区块 */
     .steam-block {
-      margin-bottom: 28px;
+      margin-bottom: 32px;
     }
 
     .steam-block-title {
       font-family: var(--pixel-font);
       font-size: 12px;
       color: var(--text-dim);
-      margin-bottom: 12px;
+      margin-bottom: 14px;
       letter-spacing: 1px;
     }
 
-    /* 最近在玩 — 紧凑横向卡片 */
+    /* 最近在玩 — 封面卡片网格 */
     .recent-list {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 10px;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
     }
 
     .recent-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 8px;
+      display: block;
       background: var(--bg-card);
-      border: 1px solid rgba(0, 255, 245, 0.08);
-      border-radius: 2px;
+      border: 1px solid rgba(0, 255, 245, 0.12);
+      border-radius: 4px;
+      overflow: hidden;
       text-decoration: none;
-      transition: all 0.2s;
+      transition: all 0.25s;
     }
 
     .recent-item:hover {
-      border-color: rgba(0, 255, 245, 0.3);
-      transform: translateX(4px);
+      border-color: rgba(0, 255, 245, 0.4);
+      transform: translateY(-3px);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
     }
 
     .recent-cover {
-      width: 120px;
+      width: 100%;
       aspect-ratio: 460/215;
       object-fit: cover;
-      border-radius: 2px;
-      flex-shrink: 0;
+      display: block;
     }
 
     .recent-detail {
-      min-width: 0;
+      padding: 10px 12px;
     }
 
     .recent-name {
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 600;
       color: var(--text);
-      margin-bottom: 4px;
+      margin-bottom: 3px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -239,7 +237,7 @@ const games = allGames.sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99
 
     .recent-meta {
       font-family: var(--mono-font);
-      font-size: 12px;
+      font-size: 11px;
       color: var(--text-dim);
     }
 
@@ -247,38 +245,38 @@ const games = allGames.sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99
     .top-list {
       display: flex;
       flex-direction: column;
-      gap: 4px;
+      gap: 2px;
     }
 
     .rank-row {
-      display: flex;
+      display: grid;
+      grid-template-columns: 24px 32px 1fr minmax(80px, 3fr) 56px;
       align-items: center;
       gap: 10px;
-      padding: 8px 12px;
+      padding: 9px 12px;
       text-decoration: none;
-      border-radius: 2px;
+      border-radius: 3px;
       transition: background 0.15s;
     }
 
     .rank-row:hover {
-      background: rgba(0, 255, 245, 0.04);
+      background: var(--bg-card-hover);
     }
 
     .rank-num {
       font-family: var(--pixel-font);
       font-size: 11px;
       color: var(--text-dim);
-      min-width: 22px;
+      text-align: center;
     }
     .rank-1 { color: var(--cyan); text-shadow: var(--glow-cyan); }
     .rank-2 { color: var(--magenta); }
     .rank-3 { color: var(--purple); }
 
     .rank-icon {
-      width: 28px;
-      height: 28px;
-      border-radius: 2px;
-      flex-shrink: 0;
+      width: 32px;
+      height: 32px;
+      border-radius: 3px;
     }
 
     .rank-name {
@@ -287,35 +285,50 @@ const games = allGames.sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      min-width: 0;
-      flex-shrink: 1;
     }
 
     .rank-bar-bg {
-      flex: 1;
-      height: 3px;
-      background: rgba(0, 255, 245, 0.06);
-      border-radius: 2px;
-      min-width: 40px;
+      height: 6px;
+      background: var(--bg-card);
+      border: 1px solid rgba(0, 255, 245, 0.08);
+      border-radius: 3px;
+      overflow: hidden;
     }
 
     .rank-bar-fill {
       height: 100%;
       background: linear-gradient(90deg, var(--cyan), var(--purple));
-      border-radius: 2px;
+      border-radius: 3px;
     }
 
     .rank-hours {
       font-family: var(--mono-font);
       font-size: 12px;
       color: var(--cyan);
-      min-width: 50px;
       text-align: right;
-      flex-shrink: 0;
+    }
+
+    /* 浅色模式补丁 */
+    :global(html[data-theme="light"]) .steam-section {
+      border-top-color: rgba(0, 130, 140, 0.2);
+    }
+    :global(html[data-theme="light"]) .recent-item {
+      border-color: rgba(0, 0, 0, 0.1);
+    }
+    :global(html[data-theme="light"]) .recent-item:hover {
+      border-color: var(--cyan);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    }
+    :global(html[data-theme="light"]) .rank-row:hover {
+      background: rgba(0, 130, 140, 0.04);
+    }
+    :global(html[data-theme="light"]) .rank-bar-bg {
+      background: rgba(0, 0, 0, 0.06);
+      border-color: rgba(0, 0, 0, 0.08);
     }
 
     /* 移动端 */
-    @media (max-width: 600px) {
+    @media (max-width: 640px) {
       .steam-stats {
         flex-wrap: wrap;
         gap: 4px 8px;
@@ -324,13 +337,17 @@ const games = allGames.sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99
         font-size: 16px;
       }
       .recent-list {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, 1fr);
       }
-      .recent-cover {
-        width: 90px;
+      .rank-row {
+        grid-template-columns: 24px 28px 1fr 56px;
       }
-      .rank-name {
-        max-width: 100px;
+      .rank-bar-bg {
+        display: none;
+      }
+      .rank-icon {
+        width: 28px;
+        height: 28px;
       }
     }
   </style>
