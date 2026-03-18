@@ -660,6 +660,22 @@ const stats = [
       background: rgba(0, 255, 245, 0.85);
       box-shadow: 0 0 10px rgba(0, 255, 245, 0.4);
     }
+    /* 浅色模式：用深青色，提高对比度 */
+    :global(html[data-theme="light"]) .heatmap-cell {
+      background: rgba(0, 130, 140, 0.1);
+    }
+    :global(html[data-theme="light"]) .heatmap-cell.mild {
+      background: rgba(0, 130, 140, 0.3);
+      box-shadow: none;
+    }
+    :global(html[data-theme="light"]) .heatmap-cell.warm {
+      background: rgba(0, 130, 140, 0.55);
+      box-shadow: none;
+    }
+    :global(html[data-theme="light"]) .heatmap-cell.hot {
+      background: rgba(0, 130, 140, 0.85);
+      box-shadow: none;
+    }
     .heatmap-legend {
       display: flex;
       align-items: center;
