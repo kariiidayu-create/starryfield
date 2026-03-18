@@ -108,7 +108,7 @@ const games = allGames.sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99
       recentEl.innerHTML = data.recent_games.slice(0, 6).map((g: any) => `
         <div class="recent-item">
           <img src="${g.header}" alt="${g.name}" class="recent-cover" loading="lazy" />
-          <div class="recent-detail">
+          <div class="recent-overlay">
             <div class="recent-name">${g.name}</div>
             <div class="recent-meta">${g.hours}h · ${timeAgo(g.last_played)}</div>
           </div>
@@ -173,27 +173,24 @@ const games = allGames.sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99
       letter-spacing: 1px;
     }
 
-    /* 最近在玩 — 封面卡片网格 */
+    /* 最近在玩 — gallery 模式 */
     .recent-list {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-      gap: 12px;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
     }
 
     .recent-item {
-      display: block;
-      background: var(--bg-card);
-      border: 1px solid rgba(0, 255, 245, 0.12);
-      border-radius: 4px;
+      position: relative;
+      border-radius: 3px;
       overflow: hidden;
-      text-decoration: none;
-      transition: all 0.25s;
+      border: 1px solid rgba(0, 255, 245, 0.1);
+      transition: all 0.3s;
     }
 
     .recent-item:hover {
-      border-color: rgba(0, 255, 245, 0.4);
-      transform: translateY(-3px);
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+      border-color: rgba(0, 255, 245, 0.5);
+      box-shadow: var(--glow-cyan);
     }
 
     .recent-cover {
@@ -203,25 +200,36 @@ const games = allGames.sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99
       display: block;
     }
 
-    .recent-detail {
-      padding: 10px 12px;
+    .recent-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 10px;
+      background: linear-gradient(transparent, rgba(0, 0, 0, 0.85));
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+
+    .recent-item:hover .recent-overlay {
+      opacity: 1;
     }
 
     .recent-name {
       font-family: var(--pixel-font);
-      font-size: 11px;
-      color: var(--text);
-      margin-bottom: 4px;
+      font-size: 10px;
+      color: #fff;
+      margin-bottom: 3px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      line-height: 1.4;
+      line-height: 1.5;
     }
 
     .recent-meta {
       font-family: var(--pixel-font);
-      font-size: 9px;
-      color: var(--text-dim);
+      font-size: 8px;
+      color: rgba(255, 255, 255, 0.7);
     }
 
     /* 浅色模式补丁 */
@@ -233,7 +241,7 @@ const games = allGames.sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99
     }
     :global(html[data-theme="light"]) .recent-item:hover {
       border-color: var(--cyan);
-      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+      box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
     }
     /* 移动端 */
     @media (max-width: 640px) {
@@ -246,6 +254,10 @@ const games = allGames.sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99
       }
       .recent-list {
         grid-template-columns: repeat(2, 1fr);
+        gap: 6px;
+      }
+      .recent-overlay {
+        opacity: 1;
       }
     }
   </style>
