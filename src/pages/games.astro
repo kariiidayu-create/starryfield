@@ -64,11 +64,6 @@ const games = allGames.sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99
           <div class="recent-list" id="recent-games"></div>
         </div>
 
-        <!-- 游玩时长 TOP 10 -->
-        <div class="steam-block">
-          <div class="steam-block-title">时长排行</div>
-          <div class="top-list" id="top-games"></div>
-        </div>
       </div>
 
       <div id="steam-error" style="display: none; text-align: center; padding: 30px 0; font-family: var(--mono-font); font-size: 13px; color: var(--text-dim);">
@@ -108,29 +103,16 @@ const games = allGames.sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99
       document.getElementById('total-hours')!.textContent = data.total_hours.toLocaleString();
       document.getElementById('avg-hours')!.textContent = (data.total_hours / data.total_games).toFixed(1) + 'h';
 
-      // 最近在玩 — 横向卡片
+      // 最近在玩
       const recentEl = document.getElementById('recent-games')!;
       recentEl.innerHTML = data.recent_games.slice(0, 6).map((g: any) => `
-        <a href="https://store.steampowered.com/app/${g.appid}" target="_blank" rel="noopener" class="recent-item">
+        <div class="recent-item">
           <img src="${g.header}" alt="${g.name}" class="recent-cover" loading="lazy" />
           <div class="recent-detail">
             <div class="recent-name">${g.name}</div>
             <div class="recent-meta">${g.hours}h · ${timeAgo(g.last_played)}</div>
           </div>
-        </a>
-      `).join('');
-
-      // 时长排行 — 紧凑列表
-      const topEl = document.getElementById('top-games')!;
-      const maxHours = data.top_games[0]?.hours || 1;
-      topEl.innerHTML = data.top_games.slice(0, 10).map((g: any, i: number) => `
-        <a href="https://store.steampowered.com/app/${g.appid}" target="_blank" rel="noopener" class="rank-row">
-          <span class="rank-num rank-${i < 3 ? i + 1 : 'n'}">${String(i + 1).padStart(2, '0')}</span>
-          <img src="${g.icon}" alt="" class="rank-icon" loading="lazy" />
-          <span class="rank-name">${g.name}</span>
-          <div class="rank-bar-bg"><div class="rank-bar-fill" style="width:${(g.hours / maxHours * 100).toFixed(1)}%"></div></div>
-          <span class="rank-hours">${g.hours}h</span>
-        </a>
+        </div>
       `).join('');
     }
 
@@ -226,86 +208,20 @@ const games = allGames.sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99
     }
 
     .recent-name {
-      font-size: 13px;
-      font-weight: 600;
+      font-family: var(--pixel-font);
+      font-size: 11px;
       color: var(--text);
-      margin-bottom: 3px;
+      margin-bottom: 4px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      line-height: 1.4;
     }
 
     .recent-meta {
-      font-family: var(--mono-font);
-      font-size: 11px;
-      color: var(--text-dim);
-    }
-
-    /* 时长排行 */
-    .top-list {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-
-    .rank-row {
-      display: grid;
-      grid-template-columns: 24px 32px 1fr minmax(80px, 3fr) 56px;
-      align-items: center;
-      gap: 10px;
-      padding: 9px 12px;
-      text-decoration: none;
-      border-radius: 3px;
-      transition: background 0.15s;
-    }
-
-    .rank-row:hover {
-      background: var(--bg-card-hover);
-    }
-
-    .rank-num {
       font-family: var(--pixel-font);
-      font-size: 11px;
+      font-size: 9px;
       color: var(--text-dim);
-      text-align: center;
-    }
-    .rank-1 { color: var(--cyan); text-shadow: var(--glow-cyan); }
-    .rank-2 { color: var(--magenta); }
-    .rank-3 { color: var(--purple); }
-
-    .rank-icon {
-      width: 32px;
-      height: 32px;
-      border-radius: 3px;
-    }
-
-    .rank-name {
-      font-size: 13px;
-      color: var(--text);
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .rank-bar-bg {
-      height: 6px;
-      background: var(--bg-card);
-      border: 1px solid rgba(0, 255, 245, 0.08);
-      border-radius: 3px;
-      overflow: hidden;
-    }
-
-    .rank-bar-fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--cyan), var(--purple));
-      border-radius: 3px;
-    }
-
-    .rank-hours {
-      font-family: var(--mono-font);
-      font-size: 12px;
-      color: var(--cyan);
-      text-align: right;
     }
 
     /* 浅色模式补丁 */
@@ -319,14 +235,6 @@ const games = allGames.sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99
       border-color: var(--cyan);
       box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
     }
-    :global(html[data-theme="light"]) .rank-row:hover {
-      background: rgba(0, 130, 140, 0.04);
-    }
-    :global(html[data-theme="light"]) .rank-bar-bg {
-      background: rgba(0, 0, 0, 0.06);
-      border-color: rgba(0, 0, 0, 0.08);
-    }
-
     /* 移动端 */
     @media (max-width: 640px) {
       .steam-stats {
@@ -338,16 +246,6 @@ const games = allGames.sort((a, b) => (a.data.order ?? 99) - (b.data.order ?? 99
       }
       .recent-list {
         grid-template-columns: repeat(2, 1fr);
-      }
-      .rank-row {
-        grid-template-columns: 24px 28px 1fr 56px;
-      }
-      .rank-bar-bg {
-        display: none;
-      }
-      .rank-icon {
-        width: 28px;
-        height: 28px;
       }
     }
   </style>
