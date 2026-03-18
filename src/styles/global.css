@@ -377,6 +377,78 @@ body::after {
   width: 100%;
 }
 
+/* 导航下拉菜单 */
+.nav-dropdown {
+  position: relative;
+}
+
+.nav-dropdown-trigger {
+  font-family: var(--pixel-font);
+  font-size: 13px;
+  color: var(--text-dim);
+  cursor: pointer;
+  position: relative;
+  padding-bottom: 4px;
+  letter-spacing: 1px;
+  transition: color 0.2s;
+}
+
+.nav-dropdown-trigger::after {
+  content: ' ▾';
+  font-size: 10px;
+  opacity: 0.5;
+}
+
+.nav-dropdown:hover .nav-dropdown-trigger {
+  color: var(--cyan);
+  text-shadow: var(--glow-cyan);
+}
+
+.nav-dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  margin-top: 10px;
+  background: var(--bg-card);
+  border: 1px solid rgba(0, 255, 245, 0.2);
+  border-radius: 2px;
+  padding: 8px 0;
+  min-width: 120px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s, transform 0.2s;
+  transform: translateX(-50%) translateY(-4px);
+  z-index: 100;
+}
+
+.nav-dropdown:hover .nav-dropdown-menu {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
+}
+
+.nav-dropdown-menu a {
+  display: block;
+  padding: 8px 20px;
+  font-family: var(--pixel-font);
+  font-size: 12px;
+  color: var(--text-dim);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: all 0.15s;
+}
+
+.nav-dropdown-menu a:hover {
+  color: var(--cyan);
+  text-shadow: var(--glow-cyan);
+  background: rgba(0, 255, 245, 0.05);
+}
+
+.nav-dropdown-menu a::after {
+  display: none;
+}
+
 /* --- Pixel decoration --- */
 .pixel-border {
   border: 2px solid var(--cyan);
@@ -988,15 +1060,80 @@ body.nav-open {
     transition: opacity 0.3s, transform 0.3s;
   }
 
-  .site-nav.open a:nth-child(1) { transition-delay: 0.05s; }
-  .site-nav.open a:nth-child(2) { transition-delay: 0.1s; }
-  .site-nav.open a:nth-child(3) { transition-delay: 0.15s; }
-  .site-nav.open a:nth-child(4) { transition-delay: 0.2s; }
-  .site-nav.open a:nth-child(5) { transition-delay: 0.25s; }
-  .site-nav.open a:nth-child(6) { transition-delay: 0.3s; }
-  .site-nav.open a:nth-child(7) { transition-delay: 0.35s; }
-  .site-nav.open a:nth-child(8) { transition-delay: 0.4s; }
-  .site-nav.open a:nth-child(9) { transition-delay: 0.45s; }
-  .site-nav.open a:nth-child(10) { transition-delay: 0.5s; }
-  .site-nav.open a:nth-child(11) { transition-delay: 0.55s; }
+  /* 直接子元素的动画延迟（a 和 .nav-dropdown） */
+  .site-nav.open > a:nth-child(1) { transition-delay: 0.05s; }
+  .site-nav.open > a:nth-child(2) { transition-delay: 0.1s; }
+  .site-nav.open > .nav-dropdown { transition-delay: 0.15s; }
+  .site-nav.open > a:nth-child(4) { transition-delay: 0.35s; }
+  .site-nav.open > a:nth-child(5) { transition-delay: 0.4s; }
+  .site-nav.open > a:nth-child(6) { transition-delay: 0.45s; }
+  .site-nav.open > a:nth-child(7) { transition-delay: 0.5s; }
+  .site-nav.open > a:nth-child(8) { transition-delay: 0.55s; }
+  .site-nav.open > a:nth-child(9) { transition-delay: 0.6s; }
+
+  /* 移动端下拉菜单展开显示 */
+  .nav-dropdown {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .nav-dropdown-trigger {
+    font-size: 16px;
+    padding: 16px 0;
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  .site-nav.open .nav-dropdown-trigger {
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.3s, transform 0.3s;
+    transition-delay: 0.15s;
+  }
+
+  .nav-dropdown-trigger::after {
+    display: none;
+  }
+
+  .nav-dropdown-menu {
+    position: static;
+    transform: none;
+    background: none;
+    border: none;
+    padding: 0;
+    min-width: auto;
+    opacity: 1;
+    pointer-events: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .nav-dropdown:hover .nav-dropdown-menu {
+    transform: none;
+  }
+
+  .nav-dropdown-menu a {
+    font-size: 14px;
+    padding: 10px 0;
+    color: var(--text-dim);
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  .site-nav.open .nav-dropdown-menu a {
+    opacity: 0.7;
+    transform: translateY(0);
+    transition: opacity 0.3s, transform 0.3s;
+  }
+
+  .site-nav.open .nav-dropdown-menu a:nth-child(1) { transition-delay: 0.2s; }
+  .site-nav.open .nav-dropdown-menu a:nth-child(2) { transition-delay: 0.25s; }
+  .site-nav.open .nav-dropdown-menu a:nth-child(3) { transition-delay: 0.3s; }
+
+  .nav-dropdown-menu a:hover {
+    background: none;
+    opacity: 1;
+  }
 }
