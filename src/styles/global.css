@@ -339,6 +339,7 @@ body::after {
 .site-nav {
   margin-top: 20px;
   display: flex;
+  align-items: baseline;
   gap: 24px;
   flex-wrap: wrap;
 }
@@ -380,6 +381,8 @@ body::after {
 /* 导航下拉菜单 */
 .nav-dropdown {
   position: relative;
+  display: flex;
+  align-items: center;
 }
 
 .nav-dropdown-trigger {
