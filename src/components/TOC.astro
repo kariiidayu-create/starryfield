@@ -25,7 +25,7 @@ const filtered = headings.filter(h => h.depth <= 3);
   .toc {
     position: sticky;
     top: 24px;
-    width: 200px;
+    width: 240px;
     flex-shrink: 0;
     max-height: calc(100vh - 48px);
     overflow-y: auto;
@@ -34,7 +34,7 @@ const filtered = headings.filter(h => h.depth <= 3);
 
   .toc-title {
     font-family: var(--pixel-font);
-    font-size: 11px;
+    font-size: 13px;
     color: var(--cyan);
     text-shadow: var(--glow-cyan);
     margin-bottom: 16px;
@@ -61,7 +61,7 @@ const filtered = headings.filter(h => h.depth <= 3);
     position: relative;
     display: block;
     text-decoration: none;
-    padding: 6px 0;
+    padding: 8px 0;
   }
 
   .toc-dot {
@@ -69,8 +69,8 @@ const filtered = headings.filter(h => h.depth <= 3);
     left: -19px;
     top: 50%;
     transform: translateY(-50%);
-    width: 8px;
-    height: 8px;
+    width: 10px;
+    height: 10px;
     border-radius: 50%;
     background: var(--bg);
     border: 2px solid rgba(0, 255, 245, 0.3);
@@ -87,7 +87,7 @@ const filtered = headings.filter(h => h.depth <= 3);
 
   .toc-text {
     font-family: var(--mono-font);
-    font-size: 12px;
+    font-size: 14px;
     color: var(--text-dim);
     line-height: 1.5;
     transition: color 0.2s;
