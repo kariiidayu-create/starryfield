@@ -6,7 +6,7 @@ import Share from '../../components/Share.astro';
 import TOC from '../../components/TOC.astro';
 import ScrollTimeline from '../../components/interactions/ScrollTimeline.astro';
 import { getCollection, render } from 'astro:content';
-import { getReadingTime } from '../../utils/reading-time';
+import { getReadingTime, getWordCount } from '../../utils/reading-time';
 
 export async function getStaticPaths() {
   const posts = await getCollection('explorations');
@@ -16,6 +16,7 @@ export async function getStaticPaths() {
 const { post } = Astro.props;
 const { Content, headings } = await render(post);
 const readingTime = getReadingTime(post.body || '');
+const wordCount = getWordCount(post.body || '');
 const interaction = post.data.interaction;
 ---
 
@@ -26,6 +27,7 @@ const interaction = post.data.interaction;
         <div class="post-meta" style="margin-bottom: 16px;">
           <span class="tag">{post.data.tag}</span>
           <span>{post.data.date}</span>
+          <span class="word-count">{wordCount} 字</span>
           <span class="reading-time">约 {readingTime} 分钟</span>
         </div>
         <h1 class="post-title">{post.data.title}</h1>

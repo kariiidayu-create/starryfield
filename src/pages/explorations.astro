@@ -2,6 +2,7 @@
 import Base from '../layouts/Base.astro';
 import PixelIcon from '../components/PixelIcon.astro';
 import { getCollection } from 'astro:content';
+import { getReadingTime, getWordCount } from '../utils/reading-time';
 
 const allPosts = await getCollection('explorations');
 const posts = allPosts.sort((a, b) => b.data.date.localeCompare(a.data.date));
@@ -35,16 +36,28 @@ const locations = allPosts
       > ls ./explorations/
     </p>
 
-    {posts.map(post => (
-      <a href={`/explorations/${post.id}`} style="text-decoration: none; display: block;">
-        <article class="card">
-          <span class="card-tag">{post.data.tag}</span>
-          <h4 class="card-title">{post.data.title}</h4>
-          <p class="card-excerpt">{post.data.excerpt}</p>
-          <span class="card-date">{post.data.date}</span>
-        </article>
-      </a>
-    ))}
+    <div class="timeline">
+      {posts.map((post) => {
+        const readingTime = getReadingTime(post.body || '');
+        const wordCount = getWordCount(post.body || '');
+        return (
+          <a href={`/explorations/${post.id}`} class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-time">{post.data.date}</div>
+            <div class="timeline-card">
+              <span class="card-tag">{post.data.tag}</span>
+              <h4 class="timeline-title">{post.data.title}</h4>
+              <p class="timeline-excerpt">{post.data.excerpt}</p>
+              <div class="timeline-meta">
+                <span>{wordCount} 字</span>
+                <span>·</span>
+                <span>约 {readingTime} 分钟</span>
+              </div>
+            </div>
+          </a>
+        );
+      })}
+    </div>
 
     <p style="font-family: var(--pixel-font); font-size: 13px; color: var(--text-dim); text-align: center; margin-top: 40px;">
       // 更多探索进行中...
@@ -80,3 +93,109 @@ const locations = allPosts
     </script>
   )}
 </Base>
+
+<style>
+  .timeline {
+    position: relative;
+    padding-left: 32px;
+  }
+
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 7px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(180deg, var(--cyan), var(--magenta), transparent);
+    opacity: 0.3;
+  }
+
+  .timeline-item {
+    position: relative;
+    display: block;
+    text-decoration: none;
+    margin-bottom: 32px;
+  }
+
+  .timeline-dot {
+    position: absolute;
+    left: -29px;
+    top: 6px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 2px solid rgba(0, 255, 245, 0.4);
+    transition: all 0.3s ease;
+    z-index: 1;
+  }
+
+  .timeline-item:hover .timeline-dot {
+    background: var(--cyan);
+    border-color: var(--cyan);
+    box-shadow: 0 0 12px rgba(0, 255, 245, 0.6);
+  }
+
+  .timeline-time {
+    font-family: var(--mono-font);
+    font-size: 13px;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+    letter-spacing: 0.5px;
+  }
+
+  .timeline-card {
+    background: var(--bg-card);
+    border: 1px solid rgba(0, 255, 245, 0.1);
+    border-radius: 2px;
+    padding: 20px 24px;
+    transition: all 0.3s ease;
+  }
+
+  .timeline-item:hover .timeline-card {
+    background: var(--bg-card-hover);
+    border-color: rgba(0, 255, 245, 0.3);
+    transform: translateX(4px);
+  }
+
+  .timeline-title {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--text);
+  }
+
+  .timeline-excerpt {
+    font-size: 15px;
+    color: var(--text-dim);
+    line-height: 1.7;
+    margin-bottom: 12px;
+  }
+
+  .timeline-meta {
+    display: flex;
+    gap: 8px;
+    font-family: var(--mono-font);
+    font-size: 13px;
+    color: var(--text-dim);
+    opacity: 0.7;
+  }
+
+  @media (max-width: 600px) {
+    .timeline {
+      padding-left: 24px;
+    }
+    .timeline-dot {
+      left: -21px;
+      width: 10px;
+      height: 10px;
+    }
+    .timeline::before {
+      left: 5px;
+    }
+    .timeline-card {
+      padding: 16px;
+    }
+  }
+</style>
