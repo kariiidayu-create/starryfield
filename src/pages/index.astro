@@ -49,10 +49,10 @@ for (const line of gitLog.trim().split('\n')) {
 const today = new Date();
 const weeks: { date: string; count: number; dayOfWeek: number }[][] = [];
 const startDate = new Date(today);
-startDate.setDate(startDate.getDate() - (26 * 7 - 1) - startDate.getDay());
+startDate.setDate(startDate.getDate() - (18 * 7 - 1) - startDate.getDay());
 
 let currentWeek: { date: string; count: number; dayOfWeek: number }[] = [];
-for (let i = 0; i < 26 * 7 + today.getDay() + 1; i++) {
+for (let i = 0; i < 18 * 7 + today.getDay() + 1; i++) {
   const d = new Date(startDate);
   d.setDate(d.getDate() + i);
   const key = d.toISOString().slice(0, 10);
@@ -148,10 +148,10 @@ const stats = [
         <img id="qr-img" src="" alt="二维码" style="display:none;" />
         <div id="qr-text" style="display:none; font-family: var(--mono-font); font-size: 15px; color: var(--cyan); text-align: center; padding: 20px 10px; word-break: break-all;"></div>
       </dialog>
-      <p style="font-size: 15px; color: var(--text-dim); line-height: 1.8; max-width: 600px; margin-left: 24px;">
-        我是<span style="color: var(--cyan);">星见眠</span>，可以叫我阿眠，Web3从业者。<br />
+      <p class="hero-intro" style="font-size: 15px; color: var(--text-dim); line-height: 2; max-width: 600px; margin-left: 24px; padding-left: 16px; border-left: 2px solid transparent; border-image: linear-gradient(180deg, var(--cyan), var(--purple), transparent) 1;">
+        我是<span style="color: var(--cyan); text-shadow: var(--glow-cyan);">星见眠</span>，可以叫我阿眠，Web3从业者。<br />
         一个在现实里打MMO的数字游民，在这里记录她的冒险日志。<br />
-        天赋永远不会过期，地图永远没有开完 :)
+        天赋永远不会过期，地图永远没有开完 <span style="color: var(--gold);">:)</span>
       </p>
     </div>
   </section>
@@ -188,9 +188,10 @@ const stats = [
       right: 0;
       bottom: 0;
       background:
-        linear-gradient(to bottom, transparent 40%, var(--bg-deep)),
-        linear-gradient(to right, var(--bg-deep), transparent 30%, transparent 70%, var(--bg-deep)),
-        linear-gradient(to bottom, var(--bg-deep), transparent 20%);
+        rgba(11, 13, 24, 0.38),
+        linear-gradient(to bottom, transparent 34%, var(--bg-deep) 92%),
+        linear-gradient(to right, var(--bg-deep), transparent 32%, transparent 68%, var(--bg-deep)),
+        linear-gradient(to bottom, var(--bg-deep), transparent 22%);
     }
     .hero-content {
       position: relative;
@@ -251,6 +252,15 @@ const stats = [
       cursor: pointer;
       transition: transform 0.2s;
     }
+    @media (max-width: 640px) {
+      .hero-intro {
+        margin-left: 4px !important;
+        margin-right: 12px;
+        max-width: none !important;
+        font-size: 14px !important;
+      }
+    }
+
     .hero-avatar:active {
       transform: scale(0.92);
     }
@@ -356,7 +366,7 @@ const stats = [
   <!-- Heatmap -->
   <section style="margin-bottom: 60px;">
     <h3 class="section-title">
-      <PixelIcon name="satellite" size={20} /> 更新热力图
+      <span class="st-label"><PixelIcon name="satellite" size={20} /> 更新热力图</span>
     </h3>
     <div class="heatmap-wrap">
       <div class="heatmap-layout">
@@ -696,7 +706,7 @@ const stats = [
   <!-- Recent Activity -->
   <section style="margin-bottom: 60px;">
     <h3 class="section-title">
-      <PixelIcon name="lightning" size={20} /> 最近动态
+      <span class="st-label"><PixelIcon name="lightning" size={20} /> 最近动态</span>
     </h3>
     <div class="recent-list">
       {recentItems.map(item => (
@@ -754,7 +764,8 @@ const stats = [
   <!-- Games -->
   <section style="margin-bottom: 60px;">
     <h3 class="section-title">
-      <PixelIcon name="gamepad" size={20} /> 游戏收藏
+      <span class="st-label"><PixelIcon name="gamepad" size={20} /> 游戏收藏</span>
+      <a href="/games" class="view-all-link">VIEW ALL →</a>
     </h3>
     <div class="game-grid">
       {games.map(game => (
@@ -772,16 +783,15 @@ const stats = [
           </div>
         </a>
       ))}
-      <a href="/games" class="game-card" style="display: flex; align-items: center; justify-content: center; min-height: 200px; border-style: dashed; text-decoration: none;">
-        <span style="font-family: var(--pixel-font); font-size: 13px; color: var(--text-dim);">VIEW ALL →</span>
-      </a>
     </div>
   </section>
 
   <!-- Crafts -->
+  {crafts.length > 0 && (
   <section style="margin-bottom: 60px;">
     <h3 class="section-title">
-      <PixelIcon name="scissors" size={20} /> 手工制作
+      <span class="st-label"><PixelIcon name="scissors" size={20} /> 手工制作</span>
+      <a href="/crafts" class="view-all-link">VIEW ALL →</a>
     </h3>
     <div class="game-grid">
       {crafts.map(craft => (
@@ -793,16 +803,16 @@ const stats = [
           </div>
         </a>
       ))}
-      <a href="/crafts" class="game-card" style="display: flex; align-items: center; justify-content: center; min-height: 200px; border-style: dashed; text-decoration: none;">
-        <span style="font-family: var(--pixel-font); font-size: 13px; color: var(--text-dim);">VIEW ALL →</span>
-      </a>
     </div>
   </section>
+  )}
 
   <!-- Drawings -->
+  {drawings.length > 0 && (
   <section style="margin-bottom: 60px;">
     <h3 class="section-title">
-      <PixelIcon name="palette" size={20} /> 绘画作品
+      <span class="st-label"><PixelIcon name="palette" size={20} /> 绘画作品</span>
+      <a href="/drawings" class="view-all-link">VIEW ALL →</a>
     </h3>
     <div class="game-grid">
       {drawings.map(drawing => (
@@ -814,16 +824,16 @@ const stats = [
           </div>
         </a>
       ))}
-      <a href="/drawings" class="game-card" style="display: flex; align-items: center; justify-content: center; min-height: 200px; border-style: dashed; text-decoration: none;">
-        <span style="font-family: var(--pixel-font); font-size: 13px; color: var(--text-dim);">VIEW ALL →</span>
-      </a>
     </div>
   </section>
+  )}
 
   <!-- Cooking -->
+  {dishes.length > 0 && (
   <section style="margin-bottom: 60px;">
     <h3 class="section-title">
-      <PixelIcon name="cooking" size={20} /> 美食烹饪
+      <span class="st-label"><PixelIcon name="cooking" size={20} /> 美食烹饪</span>
+      <a href="/cooking" class="view-all-link">VIEW ALL →</a>
     </h3>
     <div class="game-grid">
       {dishes.map(dish => (
@@ -835,16 +845,34 @@ const stats = [
           </div>
         </a>
       ))}
-      <a href="/cooking" class="game-card" style="display: flex; align-items: center; justify-content: center; min-height: 200px; border-style: dashed; text-decoration: none;">
-        <span style="font-family: var(--pixel-font); font-size: 13px; color: var(--text-dim);">VIEW ALL →</span>
-      </a>
     </div>
   </section>
+  )}
+
+  <!-- 造物院施工牌（空板块合并展示） -->
+  {(crafts.length === 0 || drawings.length === 0 || dishes.length === 0) && (
+  <section style="margin-bottom: 60px;">
+    <h3 class="section-title">
+      <span class="st-label"><PixelIcon name="scissors" size={20} /> 造物院</span>
+    </h3>
+    <div class="wip-board">
+      <span class="wip-board-icon">🚧</span>
+      <div class="wip-board-text">
+        {crafts.length === 0 && <span class="wip-tag">手工制作</span>}
+        {drawings.length === 0 && <span class="wip-tag">绘画作品</span>}
+        {dishes.length === 0 && <span class="wip-tag">美食烹饪</span>}
+        <br />
+        这几间工坊正在施工中，素材攒够了就开张。星原的地图，永远没有开完 :)
+      </div>
+    </div>
+  </section>
+  )}
 
   <!-- Posts -->
   <section>
     <h3 class="section-title">
-      <PixelIcon name="globe" size={20} /> 世界探索
+      <span class="st-label"><PixelIcon name="globe" size={20} /> 世界探索</span>
+      <a href="/explorations" class="view-all-link">MORE →</a>
     </h3>
     {posts.map(post => (
       <a href={`/explorations/${post.id}`} style="text-decoration: none; display: block;">
@@ -856,12 +884,25 @@ const stats = [
         </article>
       </a>
     ))}
-    <div style="text-align: center; margin-top: 24px;">
-      <a href="/explorations" style="font-family: var(--pixel-font); font-size: 13px; color: var(--text-dim); text-decoration: none; border-bottom: 1px dashed var(--text-dim); padding-bottom: 2px;">MORE EXPLORATIONS →</a>
-    </div>
   </section>
 
     </div><!-- /.home-main -->
+
+    <script>
+      // Heatmap: scroll to latest (today) on load
+      document.querySelectorAll('.heatmap-wrap, .heatmap-main').forEach(el => {
+        if (el.scrollWidth > el.clientWidth) el.scrollLeft = el.scrollWidth;
+      });
+      // Scroll reveal for home sections
+      const revealEls = document.querySelectorAll('.home-main > section');
+      revealEls.forEach((el, i) => { if (i > 0) el.classList.add('reveal'); });
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+          if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); }
+        });
+      }, { threshold: 0.08 });
+      revealEls.forEach(el => io.observe(el));
+    </script>
 
     <!-- Sidebar -->
     <aside class="home-sidebar">

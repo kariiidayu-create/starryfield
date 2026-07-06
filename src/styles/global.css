@@ -12,35 +12,49 @@
 }
 
 :root {
-  --bg-deep: #0a0a0f;
-  --bg-card: #12121a;
-  --bg-card-hover: #1a1a2e;
-  --cyan: #00fff5;
-  --magenta: #ff00ff;
-  --purple: #b44aff;
-  --green: #39ff14;
-  --text: #e0e0e0;
-  --text-dim: #aaa;
+  --bg-deep: #0b0d18;
+  --bg-card: rgba(19, 23, 42, 0.62);
+  --bg-card-hover: rgba(30, 35, 62, 0.78);
+  --cyan: #3ee6f0;
+  --magenta: #ff5ec8;
+  --purple: #a78bfa;
+  --green: #6ee7a0;
+  --gold: #ffd166;
+  --text: #dfe6f3;
+  --text-dim: #8f97b2;
   --pixel-font: 'Press Start 2P', monospace;
   --body-font: 'Noto Sans SC', sans-serif;
   --mono-font: 'JetBrains Mono', monospace;
-  --glow-cyan: 0 0 10px rgba(0, 255, 245, 0.5), 0 0 40px rgba(0, 255, 245, 0.15);
-  --glow-magenta: 0 0 10px rgba(255, 0, 255, 0.5), 0 0 40px rgba(255, 0, 255, 0.15);
+  --glow-cyan: 0 0 12px rgba(62, 230, 240, 0.45), 0 0 44px rgba(62, 230, 240, 0.12);
+  --glow-magenta: 0 0 12px rgba(255, 94, 200, 0.45), 0 0 44px rgba(255, 94, 200, 0.12);
+  --card-line: rgba(120, 160, 255, 0.10);
+  --card-line-hover: rgba(62, 230, 240, 0.32);
 }
 
 /* Light theme */
+html[data-theme="light"] body {
+  background:
+    radial-gradient(1100px 720px at 88% -12%, rgba(124, 79, 208, 0.08), transparent 62%),
+    radial-gradient(920px 640px at -12% 28%, rgba(8, 148, 166, 0.07), transparent 58%),
+    linear-gradient(180deg, #f6f7fb 0%, #f2f3f8 100%);
+  background-attachment: fixed;
+}
+
 html[data-theme="light"] {
-  --bg-deep: #f0f0f5;
-  --bg-card: #ffffff;
-  --bg-card-hover: #f5f5fa;
-  --cyan: #0099aa;
-  --magenta: #cc00aa;
-  --purple: #8833cc;
-  --green: #22aa00;
-  --text: #1a1a2e;
-  --text-dim: #666;
-  --glow-cyan: 0 0 6px rgba(0, 153, 170, 0.25);
-  --glow-magenta: 0 0 6px rgba(204, 0, 170, 0.25);
+  --bg-deep: #f2f3f8;
+  --bg-card: rgba(255, 255, 255, 0.86);
+  --bg-card-hover: #ffffff;
+  --cyan: #0894a6;
+  --magenta: #c4288f;
+  --purple: #7c4fd0;
+  --green: #1f9e50;
+  --gold: #c98f00;
+  --text: #1c2130;
+  --text-dim: #5d6577;
+  --glow-cyan: 0 0 6px rgba(8, 148, 166, 0.22);
+  --glow-magenta: 0 0 6px rgba(196, 40, 143, 0.22);
+  --card-line: rgba(30, 60, 120, 0.12);
+  --card-line-hover: rgba(8, 148, 166, 0.38);
 }
 
 /* Click star effect */
@@ -82,7 +96,13 @@ html {
 }
 
 body {
-  background: var(--bg-deep);
+  background:
+    radial-gradient(1100px 720px at 88% -12%, rgba(103, 66, 199, 0.16), transparent 62%),
+    radial-gradient(920px 640px at -12% 28%, rgba(24, 160, 214, 0.10), transparent 58%),
+    radial-gradient(1300px 860px at 52% 112%, rgba(255, 94, 200, 0.06), transparent 62%),
+    linear-gradient(180deg, #0e1122 0%, #0b0d18 46%, #090a12 100%);
+  background-attachment: fixed;
+  background-color: var(--bg-deep);
   color: var(--text);
   font-family: var(--body-font);
   font-size: 16px;
@@ -309,16 +329,30 @@ body::after {
 /* --- Header / Nav --- */
 .site-header {
   padding: 40px 0 20px;
-  border-bottom: 1px solid rgba(0, 255, 245, 0.15);
+  border-bottom: none;
   margin-bottom: 48px;
   position: relative;
+}
+
+.site-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(62, 230, 240, 0.4) 18%, rgba(167, 139, 250, 0.35) 52%, rgba(255, 94, 200, 0.25) 82%, transparent);
 }
 
 .site-title {
   font-family: var(--pixel-font);
   font-size: 32px;
   color: var(--cyan);
-  text-shadow: var(--glow-cyan);
+  background: linear-gradient(120deg, #7df3ff 0%, var(--cyan) 34%, var(--purple) 72%, var(--magenta) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 14px rgba(62, 230, 240, 0.35));
   letter-spacing: 4px;
   text-transform: uppercase;
   margin-bottom: 8px;
@@ -489,8 +523,11 @@ body::after {
 /* --- Cards --- */
 .card {
   background: var(--bg-card);
-  border: 1px solid rgba(0, 255, 245, 0.1);
-  border-radius: 2px;
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--card-line);
+  border-top-color: rgba(160, 200, 255, 0.16);
+  border-radius: 10px;
   padding: 24px;
   margin-bottom: 20px;
   transition: all 0.3s ease;
@@ -512,8 +549,9 @@ body::after {
 
 .card:hover {
   background: var(--bg-card-hover);
-  border-color: rgba(0, 255, 245, 0.3);
+  border-color: var(--card-line-hover);
   transform: translateX(4px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35), 0 0 24px rgba(62, 230, 240, 0.06);
 }
 
 .card:hover::before {
@@ -568,10 +606,110 @@ body::after {
   text-shadow: var(--glow-cyan);
   margin-bottom: 24px;
   padding-bottom: 12px;
-  border-bottom: 1px dashed rgba(0, 255, 245, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  position: relative;
+}
+
+.section-title::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, var(--cyan), rgba(62, 230, 240, 0.25) 34%, transparent 78%);
+  opacity: 0.55;
+}
+
+.st-label {
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+.view-all-link {
+  font-family: var(--pixel-font);
+  font-size: 11px;
+  color: var(--text-dim);
+  text-decoration: none;
+  letter-spacing: 1px;
+  padding: 5px 10px;
+  border: 1px solid var(--card-line);
+  border-radius: 6px;
+  transition: all 0.25s;
+  flex-shrink: 0;
+}
+
+.view-all-link:hover {
+  color: var(--cyan);
+  border-color: var(--card-line-hover);
+  text-shadow: var(--glow-cyan);
+  transform: translateX(2px);
+}
+
+/* 施工中牌 */
+.wip-board {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 20px 24px;
+  background: var(--bg-card);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  border: 1px dashed rgba(255, 209, 102, 0.35);
+  border-radius: 12px;
+  flex-wrap: wrap;
+}
+
+.wip-board-icon {
+  font-family: var(--pixel-font);
+  font-size: 20px;
+  color: var(--gold);
+  text-shadow: 0 0 12px rgba(255, 209, 102, 0.4);
+  animation: wip-blink 2.4s ease-in-out infinite;
+}
+
+@keyframes wip-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+
+.wip-board-text {
+  font-size: 14px;
+  color: var(--text-dim);
+  line-height: 1.7;
+  flex: 1;
+  min-width: 200px;
+}
+
+.wip-tag {
+  font-family: var(--mono-font);
+  font-size: 12px;
+  color: var(--gold);
+  border: 1px solid rgba(255, 209, 102, 0.3);
+  border-radius: 4px;
+  padding: 2px 8px;
+  margin-right: 6px;
+  display: inline-block;
+}
+
+/* 滚动淡入 */
+.reveal {
+  opacity: 0;
+  transform: translateY(22px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+.reveal.in {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal { opacity: 1; transform: none; transition: none; }
 }
 
 .section-title .pixel-icon {
@@ -589,17 +727,20 @@ body::after {
 
 .game-card {
   background: var(--bg-card);
-  border: 1px solid rgba(0, 255, 245, 0.1);
-  border-radius: 2px;
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--card-line);
+  border-top-color: rgba(160, 200, 255, 0.16);
+  border-radius: 12px;
   overflow: hidden;
-  transition: all 0.3s;
+  transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
   cursor: pointer;
 }
 
 .game-card:hover {
-  border-color: var(--magenta);
-  box-shadow: var(--glow-magenta);
-  transform: translateY(-4px);
+  border-color: rgba(255, 94, 200, 0.55);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.4), var(--glow-magenta);
+  transform: translateY(-6px);
 }
 
 .game-card-img {
